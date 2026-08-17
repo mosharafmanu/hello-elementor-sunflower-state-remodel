@@ -1,0 +1,100 @@
+/* ==========================================================================
+   imran.css — Imran's stylesheet
+
+   Loaded after style.css, so the design tokens in :root are already
+   available here. Scope every rule under a class so nothing leaks into
+   sections another developer owns.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Section: service cards
+   -------------------------------------------------------------------------- */
+.ssr-service-card {
+	background: var(--ssr-white);
+	border: 1px solid rgba(20, 23, 28, 0.08);
+	border-radius: 4px;
+	box-shadow: var(--ssr-shadow);
+	padding: 28px 24px;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ssr-service-card:hover,
+.ssr-service-card:focus-within {
+	transform: translateY(-4px);
+	box-shadow: 0 18px 40px rgba(20, 23, 28, 0.16);
+}
+
+.ssr-service-card__title {
+	font-family: var(--ssr-font-display);
+	font-size: 22px;
+	line-height: 1.15;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+	color: var(--ssr-navy);
+	margin: 0 0 10px;
+}
+
+.ssr-service-card__text {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--ssr-slate);
+	margin: 0;
+}
+
+.ssr-service-card__link {
+	display: inline-block;
+	margin-top: 16px;
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--ssr-gold-hover);
+	text-decoration: none;
+	border-bottom: 2px solid transparent;
+}
+
+.ssr-service-card__link:hover,
+.ssr-service-card__link:focus-visible {
+	border-bottom-color: var(--ssr-gold);
+}
+
+/* --------------------------------------------------------------------------
+   Section: trust badges strip
+   -------------------------------------------------------------------------- */
+.ssr-trust-strip {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px;
+	align-items: center;
+	justify-content: center;
+	background: var(--ssr-bone);
+	padding: 20px var(--ssr-gutter);
+}
+
+.ssr-trust-strip__item {
+	font-family: var(--ssr-font-ui);
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ssr-navy);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+	.ssr-service-card {
+		padding: 20px 18px;
+	}
+
+	.ssr-service-card__title {
+		font-size: 19px;
+	}
+
+	.ssr-trust-strip {
+		gap: 14px;
+		padding: 16px 20px;
+	}
+}
