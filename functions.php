@@ -55,7 +55,7 @@ function ssr_enqueue_styles() {
 	foreach ( array( 'imran', 'faisal' ) as $handle ) {
 		wp_enqueue_style(
 			'ssr-' . $handle,
-			get_stylesheet_directory_uri() . '/assets/css/' . $handle . '.css',
+			get_stylesheet_directory_uri() . '/' . $handle . '.css',
 			array( 'hello-elementor-child' ),
 			SSR_THEME_VERSION
 		);
