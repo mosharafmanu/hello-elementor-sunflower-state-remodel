@@ -49,6 +49,17 @@ function ssr_enqueue_styles() {
 		array( 'hello-elementor-parent', 'ssr-google-fonts' ),
 		SSR_THEME_VERSION
 	);
+
+	// Per-developer section stylesheets. Each depends on the child style.css so
+	// the --ssr-* design tokens are defined before these rules are applied.
+	foreach ( array( 'imran', 'faisal' ) as $handle ) {
+		wp_enqueue_style(
+			'ssr-' . $handle,
+			get_stylesheet_directory_uri() . '/assets/css/' . $handle . '.css',
+			array( 'hello-elementor-child' ),
+			SSR_THEME_VERSION
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'ssr_enqueue_styles', 20 );
 
