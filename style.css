@@ -2180,6 +2180,10 @@ a.ssr-btn-navy {
 
 @media (max-width: 768px) {
 
+	.ssr-ins-timeline::before {
+		display: none;
+	}
+
 	.ssr-mat-grid {
 		grid-template-columns: 1fr;
 		max-width: 560px;
@@ -3568,6 +3572,7 @@ a.ssr-btn-navy {
 	text-transform: none;
 	text-align: center;
 	color: var(--ssr-navy);
+	transition: all 0.3s ease;
 }
 
 .ssr-flat-link:hover .ssr-flat-link-text .elementor-heading-title { color: var(--ssr-gold); }
