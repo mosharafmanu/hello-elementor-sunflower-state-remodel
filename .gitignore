@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+._*
+
+# Editors
+.idea/
+.vscode/
+*.sublime-*
+
+# Dependencies / build output
+node_modules/
+vendor/
+*.log
+
+# WordPress local artifacts
+*.sql
+*.sql.gz

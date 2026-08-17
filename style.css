@@ -1,0 +1,4849 @@
+/*
+Theme Name:   Hello Elementor Sunflower State Remodel
+Theme URI:    https://wordpress-1581506-6608795.cloudwaysapps.com
+Description:  Child theme of Hello Elementor for Sunflower State Remodel — Wichita, KS. Built pixel-perfect from the Figma design with Elementor Pro.
+Author:       Sunflower State Remodel
+Template:     hello-elementor
+Version:      1.0.0
+Text Domain:  hello-elementor-sunflower-state-remodel
+*/
+
+/* ==========================================================================
+   Design tokens — extracted from the Figma design system
+   ========================================================================== */
+:root {
+	--ssr-gold:        #E9A825;
+	--ssr-gold-hover:  #C8891A;
+	--ssr-gold-light:  #FDF3DE;
+	--ssr-navy:        #14294D;
+	--ssr-navy-deep:   #0C1526;
+	--ssr-charcoal:    #14171C;
+	--ssr-bone:        #F6F3ED;
+	--ssr-slate:       #5A6472;
+	--ssr-white:       #FFFFFF;
+	--ssr-alert:       #C4462F;
+
+	--ssr-font-display: 'Anton', 'Archivo Black', Oswald, sans-serif;
+	--ssr-font-ui:      'Barlow Semi Condensed', sans-serif;
+	--ssr-font-body:    'Barlow', sans-serif;
+
+	--ssr-shadow: 0 12px 32px rgba(20, 23, 28, 0.10);
+
+	--ssr-container: 1240px;
+	--ssr-gutter: 48px;
+}
+
+/* ==========================================================================
+   Base typography
+   ========================================================================== */
+body {
+	font-family: var(--ssr-font-body);
+	color: var(--ssr-charcoal);
+	background: var(--ssr-white);
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	text-transform: uppercase;
+}
+
+/* Anton renders tight — match the Figma line heights */
+h1 { letter-spacing: -0.02em; }
+h2 { letter-spacing: -0.01em; }
+
+/* ==========================================================================
+   Header — fixed, transparent over the hero, charcoal once scrolled
+   ========================================================================== */
+body { --ssr-header-h: 88px; }
+
+.ssr-header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 50;
+	background: transparent;
+	transition: background 0.25s, height 0.25s, box-shadow 0.25s;
+}
+
+/* `background-color` needs `!important` here. The header container carries an
+   Elementor "classic background" of rgba(0,0,0,0), which post-25.css emits as
+   `.elementor-25 .elementor-element.elementor-element-8a04704:not(…)` — (0,4,0),
+   injected after this sheet — so it beat the charcoal and the scrolled header
+   stayed fully transparent at every width. `Header.tsx` is explicit:
+   `background: scrolled ? CHARCOAL : 'transparent'`. */
+.ssr-header.ssr-scrolled {
+	--ssr-header-h: 72px;
+	background-color: var(--ssr-charcoal) !important;
+	box-shadow: 0 2px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* The three header groups are absolutely placed, as in the design source:
+   logo pinned left, nav optically centred, phone + CTA pinned right. */
+.ssr-header .ssr-header-inner {
+	position: relative;
+	min-height: 88px;
+	display: flex;
+	align-items: center;
+	overflow: visible;
+	transition: min-height 0.25s;
+}
+
+.ssr-header.ssr-scrolled .ssr-header-inner {
+	min-height: 72px;
+}
+
+.ssr-header .ssr-logo {
+	position: absolute;
+	left: 28px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	width: auto;
+}
+
+/* `Header.tsx` hangs the nav off a *row* flex header with `alignItems:'center'`,
+   so its absolutely-positioned box lands vertically centred — design frame
+   1:841 puts it at y=32.5 in the 88px bar. Elementor's inner container is a
+   *column* flex, and the static position it gives an abspos child is the top
+   edge, so the nav (and, under 900px, the burger) was rendering at y=0.
+   `top/bottom:0` plus `justify-content:center` restores the centring without a
+   second transform — which matters below 900px, where the dropdown has to
+   position against the viewport and cannot have a transformed ancestor.
+   `justify-content`, not `align-items`: Elementor gives this container
+   `--flex-direction: column`, so the block axis is the *main* axis. */
+.ssr-header .ssr-nav {
+	position: absolute;
+	left: 50%;
+	top: 0;
+	bottom: 0;
+	transform: translateX(-50%);
+	width: auto;
+	display: flex;
+	justify-content: center;
+}
+
+.ssr-header .ssr-header-right {
+	position: absolute;
+	right: 28px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 2;
+	width: auto;
+}
+
+/* Logo shrinks on scroll, exactly as in the design */
+.ssr-header .ssr-logo img {
+	height: 176px;
+	width: auto;
+	transition: height 0.25s;
+}
+
+.ssr-header.ssr-scrolled .ssr-logo img {
+	height: 160px;
+}
+
+/* The image widget's width control emits
+   `.elementor-25 .elementor-element.elementor-element-845bd6d img{width:176px}`
+   — (0,3,1), which beat the `width:auto` above. With the width pinned and only
+   the height moving, the square (1254×1254) logo rendered 176×160 once scrolled
+   — 10% too wide — and 176×120 below 768px, 47% too wide. `Header.tsx` sets
+   height only and lets the width follow, so this restores that. */
+.ssr-header .ssr-logo .elementor-widget-image.ssr-logo-img img {
+	width: auto;
+}
+
+/* Nav items — pipe separators between links */
+.ssr-nav .elementor-nav-menu > li > a {
+	font-family: var(--ssr-font-ui);
+	font-size: 12.5px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	color: var(--ssr-white);
+	white-space: nowrap;
+	padding-bottom: 2px;
+	border-bottom: 2px solid transparent;
+	transition: color 0.15s;
+}
+
+/* Figma 1:844 — nav links are 12.5px on an 18.75px line, sitting 2px above
+   the active underline. Elementor's own nav rules are more specific than the
+   block above, so the two properties it overrides are restated here. */
+.ssr-nav .elementor-nav-menu--main > li > a.elementor-item {
+	line-height: 18.75px;
+	padding-bottom: 2px;
+}
+
+.ssr-nav .elementor-nav-menu > li > a:hover,
+.ssr-nav .elementor-nav-menu > li.current-menu-item > a {
+	color: var(--ssr-gold);
+}
+
+.ssr-nav .elementor-nav-menu > li.current-menu-item > a {
+	border-bottom-color: var(--ssr-gold);
+}
+
+/* Desktop `<nav>` only. `Header.tsx` draws the pipes between the horizontal
+   links and never in the mobile drawer; unscoped, this also matched the
+   dropdown's `<ul>` and left a stray `|` above every item of the open mobile
+   menu. Note the `--main` / `--dropdown` classes sit on the `<nav>` wrapper,
+   not on the `<ul>` — `.elementor-nav-menu--main > li` matches nothing. */
+.ssr-nav .elementor-nav-menu--main > .elementor-nav-menu > li + li {
+	position: relative;
+}
+
+.ssr-nav .elementor-nav-menu--main > .elementor-nav-menu > li + li::before {
+	content: '|';
+	color: rgba(255, 255, 255, 0.22);
+	font-size: 11px;
+	padding: 0 7px;
+	align-self: center;
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+.ssr-btn-gold .elementor-button,
+a.ssr-btn-gold {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	border-radius: 6px;
+	transition: background 0.15s;
+}
+
+.ssr-btn-gold .elementor-button:hover,
+a.ssr-btn-gold:hover {
+	background: var(--ssr-gold-hover);
+	color: var(--ssr-navy);
+}
+
+.ssr-btn-navy .elementor-button,
+a.ssr-btn-navy {
+	background: var(--ssr-navy);
+	color: var(--ssr-white);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	border-radius: 6px;
+}
+
+/* ==========================================================================
+   Sticky mobile CTA bar (design shows it below 900px)
+   ========================================================================== */
+.ssr-mobile-cta {
+	display: none;
+}
+
+@media (max-width: 900px) {
+	.ssr-mobile-cta {
+		position: fixed;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		z-index: 50;
+		display: flex;
+		height: 54px;
+	}
+
+	.ssr-mobile-cta a {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-family: var(--ssr-font-ui);
+		font-weight: 700;
+		font-size: 13px;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		text-decoration: none;
+	}
+
+	.ssr-mobile-cta .ssr-call {
+		background: var(--ssr-gold);
+		color: var(--ssr-navy-deep);
+	}
+
+	.ssr-mobile-cta .ssr-quote {
+		background: var(--ssr-navy);
+		color: var(--ssr-white);
+	}
+
+	body {
+		padding-bottom: 54px;
+	}
+}
+
+/* ==========================================================================
+   Gravity Forms — styled to match the Figma form design
+   ========================================================================== */
+.ssr-form .gform_wrapper .gfield_label {
+	font-family: var(--ssr-font-ui);
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	color: var(--ssr-slate);
+	margin-bottom: 7px;
+}
+
+.ssr-form .gform_wrapper input[type="text"],
+.ssr-form .gform_wrapper input[type="email"],
+.ssr-form .gform_wrapper input[type="tel"],
+.ssr-form .gform_wrapper select,
+.ssr-form .gform_wrapper textarea {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	color: var(--ssr-charcoal);
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-radius: 6px;
+	padding: 13px 14px;
+	width: 100%;
+}
+
+.ssr-form .gform_wrapper input:focus,
+.ssr-form .gform_wrapper select:focus,
+.ssr-form .gform_wrapper textarea:focus {
+	border-color: var(--ssr-gold);
+	outline: none;
+	box-shadow: 0 0 0 3px rgba(233, 168, 37, 0.18);
+}
+
+.ssr-form .gform_wrapper .gform_button {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	border: none;
+	border-radius: 6px;
+	padding: 15px 28px;
+	width: 100%;
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.ssr-form .gform_wrapper .gform_button:hover {
+	background: var(--ssr-gold-hover);
+}
+
+.ssr-form .gform_wrapper .gfield_required {
+	color: var(--ssr-alert);
+}
+
+/* ==========================================================================
+   Responsive — mirrors the breakpoints in the Figma source (900 / 768 / 480)
+   ========================================================================== */
+/* ==========================================================================
+   Content column — the design's `maxWidth: 1240; padding: 0 clamp(20px,4vw,48px)`
+   ========================================================================== */
+.ssr-boxed > .e-con-inner {
+	padding-left: clamp(20px, 4vw, 48px);
+	padding-right: clamp(20px, 4vw, 48px);
+}
+
+/* CTABand is the one boxed section with fixed 32px side padding, not the
+   fluid site default — 820px box - 2×32 = the spec's 756px content width. */
+.ssr-cta-band .ssr-boxed > .e-con-inner {
+	padding-left: 32px;
+	padding-right: 32px;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+.ssr-footer .ssr-footer-cols {
+	display: grid;
+	grid-template-columns: 1.3fr 1fr 1fr 1.2fr;
+}
+
+/* Brand blurb wraps at 240px in the design */
+.ssr-footer .ssr-footer-blurb {
+	max-width: 240px;
+}
+
+/* Copyright and the legal links share one row */
+.ssr-footer .ssr-footer-bottom > .elementor-widget,
+.ssr-footer .ssr-footer-bottom > .e-con {
+	width: auto;
+}
+
+.ssr-footer a {
+	color: inherit;
+}
+
+.ssr-footer .ssr-footer-bottom a:hover {
+	color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 900px) {
+	/* The nav widget's own hamburger takes over here — the same 900px step
+	   `Header.tsx` uses (`@media (max-width:900px){ nav{display:none} }`). The
+	   phone link goes with it, exactly as the source does
+	   (`header a[href^="tel"] {display:none}`). */
+	.ssr-header-phone {
+		display: none !important;
+	}
+
+	/* `Header.tsx` keeps the burger as the *last* child of the right-hand group
+	   — after the Free Quote button, 18px gap, group pinned to `right:28`. The
+	   old `margin-right:96px` instead parked it 96px from the edge, i.e. on top
+	   of the 119.77px button: 33px of horizontal overlap, with the button
+	   painting over the burger's bottom 9px. Pinning the burger to `right:28`
+	   and pushing the button group out (below) reproduces the source order. */
+	.ssr-header .ssr-nav {
+		left: auto;
+		right: 28px;
+		transform: none;
+		margin: 0;
+	}
+
+	/* Elementor's dropdown JS writes `top`/`left`/`width` inline, so overriding
+	   them needs `!important`. Left alone the panel opens 43px down — inside the
+	   88px bar — and its opaque charcoal sliced the logo in half. Anchoring it
+	   to the bar's own height puts it clear of the header in both scroll states
+	   (88px → 72px via `--ssr-header-h`). */
+	.ssr-header .ssr-nav .elementor-nav-menu--dropdown {
+		position: fixed !important;
+		top: var(--ssr-header-h) !important;
+		left: 0 !important;
+		width: 100% !important;
+		margin-top: 0;
+	}
+}
+
+/* Above 768px the Free Quote button is still on screen, so it has to clear the
+   burger: 28px inset + 33px burger + the 18px gap `Header.tsx` sets on the
+   group. Below 768 the button is hidden and the group collapses to nothing, so
+   the default `right:28` is left in place. */
+@media (min-width: 769px) and (max-width: 900px) {
+	.ssr-header .ssr-header-right {
+		right: 79px;
+	}
+}
+
+@media (max-width: 768px) {
+	/* `App.tsx` hides the header CTA below 768 (`.header-cta {display:none}`);
+	   the sticky mobile bar carries the call-to-action from here down. The
+	   button widget already prints the `header-cta` class. */
+	.header-cta {
+		display: none !important;
+	}
+
+	.ssr-footer .ssr-footer-cols {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 480px) {
+	.ssr-footer .ssr-footer-cols {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ==========================================================================
+   Page components — mirrors the section styles in the Figma design source.
+   Elementor native widgets supply the content; these rules supply the layout
+   primitives (grids, overlays, cards) the widgets sit inside.
+   ========================================================================== */
+
+/* ── Grids ────────────────────────────────────────────────────────────────── */
+.ssr-grid { display: grid; }
+.ssr-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.ssr-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ssr-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.ssr-grid-5 { grid-template-columns: repeat(5, 1fr); }
+.ssr-split  { grid-template-columns: 1fr 1fr; align-items: center; }
+
+@media (max-width: 900px) {
+	.ssr-grid-4 { grid-template-columns: repeat(2, 1fr); }
+	.ssr-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+	.ssr-grid-2, .ssr-grid-3, .ssr-grid-4, .ssr-split { grid-template-columns: 1fr; }
+	.ssr-grid-5 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+	.ssr-grid-5 { grid-template-columns: 1fr; }
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.ssr-hero {
+	position: relative;
+	min-height: 100vh;
+	justify-content: center;
+	background-color: var(--ssr-charcoal);
+	overflow: hidden;
+}
+
+/* Two stacked gradients, exactly as layered in the design */
+.ssr-hero::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	background:
+		linear-gradient(to bottom, rgba(14,17,22,0.28) 0%, transparent 18%, transparent 78%, rgba(14,17,22,0.55) 100%),
+		linear-gradient(90deg, rgba(14,17,22,0.94) 0%, rgba(14,17,22,0.75) 38%, rgba(14,17,22,0.10) 72%);
+}
+
+.ssr-hero > .e-con-inner,
+.ssr-hero > .elementor-element {
+	position: relative;
+	z-index: 2;
+}
+
+.ssr-hero-content {
+	padding: 96px 40px 0 48px;
+	max-width: 680px;
+	width: 100%;
+}
+
+/* Page (interior) hero — shorter, same treatment */
+.ssr-page-hero {
+	position: relative;
+	min-height: 72vh;
+	justify-content: center;
+	background-color: var(--ssr-charcoal);
+	padding-top: 84px;
+	overflow: hidden;
+}
+
+.ssr-page-hero::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	pointer-events: none;
+	background:
+		linear-gradient(to bottom, rgba(14,17,22,0.2) 0%, transparent 20%, transparent 80%, rgba(14,17,22,0.4) 100%),
+		linear-gradient(90deg, rgba(14,17,22,0.92) 0%, rgba(14,17,22,0.65) 45%, rgba(14,17,22,0.15) 80%);
+}
+
+.ssr-page-hero > .e-con-inner,
+.ssr-page-hero > .elementor-element {
+	position: relative;
+	z-index: 2;
+}
+
+.ssr-page-hero-content {
+	padding: 64px 0 64px 48px;
+	max-width: 680px;
+}
+
+@media (max-width: 768px) {
+	.ssr-hero-content,
+	.ssr-page-hero-content {
+		padding: 40px 20px 48px !important;
+		max-width: 100% !important;
+	}
+}
+
+/* Gold hand-drawn underline beneath the last hero line */
+.ssr-hero h1 .ssr-underline {
+	color: var(--ssr-gold);
+	display: block;
+	position: relative;
+	padding-bottom: 28px;
+	background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20520%2026%22%20fill%3D%22none%22%3E%3Cpath%20d%3D%22M6%2018%20C80%206%2C%20200%204%2C%20310%2013%20C390%2019%2C%20460%2017%2C%20514%2010%22%20stroke%3D%22%23E9A825%22%20stroke-width%3D%229%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20opacity%3D%220.85%22%2F%3E%3C%2Fsvg%3E") no-repeat left bottom;
+	background-size: 94% 26px;
+}
+
+/* Scroll cue at the foot of the home hero */
+.ssr-hero .ssr-scroll-cue {
+	position: absolute;
+	bottom: 32px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 24px;
+	height: 38px;
+	border-radius: 12px;
+	border: 1.5px solid rgba(255, 255, 255, 0.32);
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	padding-top: 6px;
+	z-index: 3;
+}
+
+.ssr-hero .ssr-scroll-cue::after {
+	content: '';
+	width: 4px;
+	height: 10px;
+	border-radius: 2px;
+	background: var(--ssr-gold);
+	animation: ssrScrollBob 1.4s ease-in-out infinite;
+}
+
+@keyframes ssrScrollBob {
+	0%, 100% { transform: translateY(0); opacity: 0.9; }
+	50%      { transform: translateY(7px); opacity: 0.3; }
+}
+
+/* ── Service tiles ────────────────────────────────────────────────────────── */
+.ssr-svc-card {
+	position: relative;
+	height: 240px;
+	border-radius: 6px;
+	overflow: hidden;
+	justify-content: flex-end;
+	padding: 14px 16px;
+	background-size: cover;
+	background-position: center;
+}
+
+/* Two stacked layers so the photo can zoom under a static gradient, matching
+   the source's `transform: scale(1.06)` on the card image. ::before inherits
+   the card's own background-image, so the Loop Grid's dynamic featured image
+   needs no extra markup. */
+.ssr-svc-card::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-image: inherit;
+	background-size: cover;
+	background-position: center;
+	transition: transform 0.5s ease;
+}
+
+.ssr-svc-card::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to top, rgba(14,17,22,0.88) 0%, rgba(14,17,22,0.35) 60%, transparent 100%);
+	transition: background 0.3s;
+}
+
+.ssr-svc-card:hover::before {
+	transform: scale(1.06);
+}
+
+.ssr-svc-card:hover::after {
+	background: linear-gradient(to top, rgba(14,17,22,0.97) 0%, rgba(14,17,22,0.55) 60%, rgba(14,17,22,0.2) 100%);
+}
+
+.ssr-svc-card > .elementor-element {
+	position: relative;
+	z-index: 1;
+}
+
+/* ── Gallery tiles ────────────────────────────────────────────────────────── */
+.ssr-gal-card {
+	position: relative;
+	height: 190px;
+	border-radius: 6px;
+	overflow: hidden;
+	justify-content: flex-end;
+	background-size: cover;
+	background-position: center;
+}
+
+.ssr-gal-card > .elementor-element {
+	position: relative;
+	z-index: 1;
+	background: rgba(14, 17, 22, 0.72);
+	padding: 7px 12px;
+	width: 100%;
+}
+
+/* ── Process rosette badge ────────────────────────────────────────────────── */
+.ssr-rosette {
+	width: 68px;
+	height: 68px;
+	background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2268%22%20height%3D%2268%22%20viewBox%3D%220%200%2068%2068%22%3E%3Cellipse%20cx%3D%2253.00%22%20cy%3D%2234.00%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%2890.00%2053.00%2034.00%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2247.44%22%20cy%3D%2247.44%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28135.00%2047.44%2047.44%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2234.00%22%20cy%3D%2253.00%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28180.00%2034.00%2053.00%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2220.56%22%20cy%3D%2247.44%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28225.00%2020.56%2047.44%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2215.00%22%20cy%3D%2234.00%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28270.00%2015.00%2034.00%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2220.56%22%20cy%3D%2220.56%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28315.00%2020.56%2020.56%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2234.00%22%20cy%3D%2215.00%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28360.00%2034.00%2015.00%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Cellipse%20cx%3D%2247.44%22%20cy%3D%2220.56%22%20rx%3D%227%22%20ry%3D%2211.5%22%20transform%3D%22rotate%28405.00%2047.44%2020.56%29%22%20fill%3D%22%23E9A825%22%2F%3E%3Ccircle%20cx%3D%2234%22%20cy%3D%2234%22%20r%3D%2215%22%20fill%3D%22%2314294D%22%2F%3E%3C%2Fsvg%3E") no-repeat center / 68px 68px;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.ssr-rosette .elementor-widget {
+	width: auto;
+	margin: 0;
+}
+
+.ssr-step {
+	align-items: center;
+	text-align: center;
+	position: relative;
+}
+
+/* Connector line between steps */
+.ssr-step:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	top: 34px;
+	left: 56%;
+	right: -44%;
+	height: 2px;
+	background: linear-gradient(to right, rgba(233,168,37,0.31), rgba(233,168,37,0.09));
+	z-index: 0;
+}
+
+/* The spec keeps five columns down to 768px, so the connectors must survive
+   the 769–900px band. Re-pointed from 900px to match `process-steps`. */
+@media (max-width: 768px) {
+	.ssr-step:not(:last-child)::after { display: none; }
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+.ssr-card {
+	background: var(--ssr-white);
+	border: 1px solid var(--ssr-border, #E4DFD5);
+	border-radius: 6px;
+	padding: 26px 26px 22px;
+	box-shadow: 0 12px 32px rgba(20, 23, 28, 0.06);
+}
+
+.ssr-cost-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 6px;
+	padding: 28px 28px 24px;
+	box-shadow: 0 12px 32px rgba(20, 23, 28, 0.07);
+}
+
+.ssr-feature-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 6px;
+	padding: 32px;
+	flex-direction: row;
+	gap: 22px;
+}
+
+/* Elementor injects its global heading/icon-list typography inline, AFTER this
+   stylesheet and at the same (0,2,0) specificity — so the component rules above
+   qualify the widget class too, putting them at (0,3,0) and out of that race. */
+
+/* Star rating row */
+.ssr-stars.elementor-widget-heading .elementor-heading-title {
+	color: var(--ssr-gold);
+	letter-spacing: 2px;
+	font-size: 14px;
+	line-height: 1;
+}
+
+/* Review card internals — Shared.tsx -> ReviewCard.
+   The stars are five 14px SVGs (the ★ glyph varies in shape and weight
+   between platforms), emitted by the [ssr_stars] shortcode. */
+.ssr-stars-svg .ssr-stars-row {
+	display: flex;
+	gap: 3px;
+	margin-bottom: 10px;
+}
+
+.ssr-stars-svg .ssr-stars-row svg {
+	display: block;
+	width: 14px;
+	height: 14px;
+}
+
+/* The design shows the quote in curly quotes; keeping them in CSS leaves the
+   excerpt clean for whoever edits the testimonial. */
+/* The dynamic excerpt tag emits a bare text node — no <p>, no widget
+   container — so the quote marks hang off the widget element itself.
+   Elementor indents that text node, and the leading/trailing whitespace
+   collapses to one space inside the quotes; the negative margins (one space
+   at this size) pull the marks back tight against the text, as in the design. */
+.ssr-quote::before { content: '\201C'; margin-right: -0.26em; }
+.ssr-quote::after  { content: '\201D'; margin-left: -0.26em; }
+
+.ssr-byline {
+	align-items: baseline;
+}
+
+.ssr-rev-loop .elementor-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	--grid-column-gap: 18px;
+	--grid-row-gap: 18px;
+	gap: 18px;
+}
+
+/* `col-3 col-2-tablet` in the spec: 3 columns above 768, 2 down to 480, then 1. */
+@media (max-width: 768px) {
+	.ssr-rev-loop .elementor-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+	.ssr-rev-loop .elementor-grid { grid-template-columns: 1fr; }
+}
+
+/* Service pill above a review */
+.ssr-pill.elementor-widget-heading .elementor-heading-title {
+	display: inline-block;
+	background: var(--ssr-gold-light);
+	color: var(--ssr-gold);
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 11px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	padding: 3px 10px;
+	border-radius: 999px;
+}
+
+/* City chips — an inline icon list styled as pills */
+.ssr-chips.elementor-widget-icon-list .elementor-icon-list-items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 9px;
+}
+
+.ssr-chips.elementor-widget-icon-list .elementor-icon-list-item {
+	background: rgba(233, 168, 37, 0.1);
+	color: var(--ssr-gold);
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	padding: 5px 12px;
+	border-radius: 999px;
+	border: 1px solid rgba(233, 168, 37, 0.25);
+	margin: 0;
+}
+
+.ssr-chips.elementor-widget-icon-list .elementor-icon-list-item span { color: var(--ssr-gold); }
+
+/* "30+ years" badge overlapping the crew photo */
+.ssr-badge-30 {
+	position: absolute;
+	bottom: -16px;
+	right: -10px;
+	width: 110px;
+	height: 110px;
+	background: var(--ssr-gold);
+	border-radius: 6px;
+	align-items: center;
+	justify-content: center;
+	padding: 12px;
+	text-align: center;
+	z-index: 2;
+}
+
+.ssr-relative { position: relative; }
+
+/* ── CTA band ─────────────────────────────────────────────────────────────── */
+.ssr-cta-band {
+	position: relative;
+	overflow: hidden;
+	background-color: var(--ssr-navy);
+}
+
+.ssr-cta-band::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background: radial-gradient(ellipse at 70% 50%, rgba(233, 168, 37, 0.08) 0%, transparent 60%);
+}
+
+.ssr-cta-band > .e-con-inner { position: relative; z-index: 1; }
+
+/* ── Accordion (FAQ) — Elementor's native widget, restyled ────────────────── */
+.ssr-faq .elementor-accordion .elementor-accordion-item {
+	border: none;
+	border-bottom: 1px solid #E4DFD5;
+}
+
+.ssr-faq .elementor-accordion {
+	border: 1px solid #E4DFD5;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.ssr-faq .elementor-accordion .elementor-accordion-item:last-child {
+	border-bottom: none;
+}
+
+.ssr-faq .elementor-tab-title {
+	padding: 20px 24px;
+	font-family: var(--ssr-font-body);
+	font-weight: 600;
+	font-size: 17px;
+	color: var(--ssr-charcoal);
+	background: var(--ssr-white);
+}
+
+/* The question is an <a> inside the tab title, so it takes the Kit's link
+   colour (gold) and the global heading transform unless it is targeted
+   directly. The design keeps every question charcoal and sentence case. */
+.ssr-faq .elementor-tab-title .elementor-accordion-title {
+	color: var(--ssr-charcoal);
+	text-transform: none;
+	font-family: var(--ssr-font-body);
+	font-weight: 600;
+	font-size: 17px;
+	line-height: 1.5;
+}
+
+.ssr-faq .elementor-tab-title.elementor-active {
+	background: var(--ssr-bone);
+}
+
+.ssr-faq .elementor-tab-content {
+	padding: 0 24px 20px;
+	background: var(--ssr-bone);
+	border: none;
+	color: var(--ssr-slate);
+	font-size: 16px;
+	line-height: 1.75;
+}
+
+.ssr-faq .elementor-accordion-icon { color: var(--ssr-gold); }
+
+/* Story photo fills its column, with the 30+ badge overlapping its corner */
+.ssr-crew-img img {
+	width: 100%;
+	height: clamp(260px, 40vw, 500px);
+	object-fit: cover;
+	border-radius: 6px;
+	display: block;
+}
+
+/* The in-house checklist's icon-box titles. Hello's reset.css puts
+   `margin-block: .5rem 1rem` on every h1..h6 (0,0,1); the spec is `0 0 5px`.
+   Qualified past Elementor's own (0,2,0) icon-box rules. */
+.ssr-checklist .elementor-widget-icon-box .elementor-icon-box-title {
+	margin: 0 0 5px;
+}
+
+/* Decorative service-area map keeps the design's framed panel.
+   The panel owns its height (spec `clamp(220px,40vw,340px)`); without it the
+   inline SVG's 420×340 aspect ratio drove the height and ran ~95px tall. */
+.ssr-area-map {
+	height: clamp(220px, 40vw, 340px);
+	border-radius: 6px;
+	overflow: hidden;
+	border: 1px solid rgba(233, 168, 37, 0.16);
+	background: #141e2e;
+}
+
+/* The SVG fills the panel rather than dictating its height. Default
+   `preserveAspectRatio` still keeps the 420×340 artwork undistorted. */
+.ssr-area-map > .elementor-widget-html { flex: 1 1 auto; min-height: 0; }
+.ssr-area-map > .elementor-widget-html > .elementor-widget-container { height: 100%; }
+.ssr-area-map svg { display: block; width: 100%; height: 100%; }
+
+/* ==========================================================================
+   Contact page
+   ========================================================================== */
+.ssr-contact-hero {
+	position: relative;
+	min-height: 320px;
+	height: 40vh;
+	justify-content: center;
+	background-color: var(--ssr-charcoal);
+}
+
+.ssr-contact-hero::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(14, 17, 22, 0.82);
+}
+
+.ssr-contact-hero > .e-con-inner { position: relative; z-index: 2; }
+/* The inner block is a full-width container (no `.e-con-inner`), so the cap
+   goes on the element itself. */
+.ssr-contact-hero .ssr-contact-hero-inner { max-width: 700px; margin-inline: 0; }
+
+.ssr-breadcrumb .ssr-crumb-sep { color: #C8C4BC; font-size: 12px; }
+.ssr-breadcrumb .ssr-crumb-current { color: var(--ssr-charcoal); font-weight: 600; }
+.ssr-breadcrumb a { color: var(--ssr-slate); text-decoration: none; }
+.ssr-breadcrumb a:hover { color: var(--ssr-gold); }
+
+/* 60 / 40 split — form left, contact card right */
+.ssr-contact-split {
+	display: grid;
+	grid-template-columns: 60% 40%;
+	align-items: flex-start;
+}
+
+.ssr-contact-split .ssr-form-col { padding-right: 48px; }
+
+@media (max-width: 768px) {
+	.ssr-contact-split { grid-template-columns: 1fr; }
+	.ssr-contact-split .ssr-form-col { padding-right: 0; }
+	.ssr-contact-split .ssr-sidebar-col { margin-top: 32px; }
+}
+
+.ssr-contact-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 32px;
+	box-shadow: 0 12px 32px rgba(20, 23, 28, 0.07);
+}
+
+/* "What happens after you hit send" — gold rule linking the three steps.
+   The rule lives on a plain wrapper, not on the grid itself: a pseudo-element
+   of a grid container is laid out as a grid item, so an absolutely positioned
+   `::before` there resolves its inset against one grid *area* and overflows
+   the row (it pushed the document 96px wide at 900px). */
+.ssr-after-wrap { position: relative; }
+
+/* `width: auto` is required: Elementor gives every `.e-con::before` an explicit
+   `width: max(100% + …, 100%)` for its background overlay, which would make
+   this rule 100% wide starting at left:16% and push the page 16% wider. */
+.elementor .ssr-after-wrap::before {
+	content: '';
+	position: absolute;
+	top: 48px;
+	left: 16%;
+	right: 16%;
+	width: auto;
+	height: 2px;
+	background: var(--ssr-gold);
+	z-index: 0;
+}
+
+.ssr-after-step { position: relative; z-index: 1; }
+
+@media (max-width: 768px) {
+	.elementor .ssr-after-wrap::before { display: none; }
+	.ssr-after-step { padding: 20px 0 !important; }
+}
+
+/* ==========================================================================
+   Gravity Forms — service picker cards, time picker, progress bar
+   ========================================================================== */
+.ssr-form .gform_wrapper .gf_progressbar_wrapper {
+	margin-bottom: 32px;
+}
+
+.ssr-form .gform_wrapper .gf_progressbar {
+	height: 4px;
+	background: #E4DFD5;
+	border-radius: 2px;
+	padding: 0;
+}
+
+.ssr-form .gform_wrapper .gf_progressbar_percentage {
+	height: 4px;
+	background: var(--ssr-gold);
+	border-radius: 2px;
+	transition: width 0.3s ease;
+}
+
+.ssr-form .gform_wrapper .gf_progressbar_percentage span { display: none; }
+
+.ssr-form .gform_wrapper .gf_progressbar_title {
+	font-family: var(--ssr-font-ui);
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--ssr-gold);
+	font-weight: 700;
+	margin-bottom: 12px;
+}
+
+/* Service picker rendered as selectable cards, as in the design */
+.ssr-form .ssr-service-picker .gfield_checkbox {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+}
+
+.ssr-form .ssr-service-picker .gchoice {
+	margin: 0;
+}
+
+.ssr-form .ssr-service-picker .gchoice input[type="checkbox"] {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.ssr-form .ssr-service-picker .gchoice label {
+	display: block;
+	border: 2px solid #E4DFD5;
+	background: var(--ssr-white);
+	border-radius: 6px;
+	padding: 16px 12px;
+	cursor: pointer;
+	text-align: center;
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--ssr-charcoal);
+	transition: all 0.15s;
+	margin: 0;
+}
+
+.ssr-form .ssr-service-picker .gchoice input:checked + label {
+	border-color: var(--ssr-gold);
+	background: var(--ssr-gold-light);
+}
+
+.ssr-form .ssr-service-picker .gchoice input:focus-visible + label {
+	outline: 2px solid var(--ssr-gold);
+	outline-offset: 2px;
+}
+
+/* Best-time-to-reach radio group rendered as a segmented control */
+.ssr-form .ssr-time-picker .gfield_radio {
+	display: flex;
+	gap: 10px;
+}
+
+.ssr-form .ssr-time-picker .gchoice { flex: 1; margin: 0; }
+
+.ssr-form .ssr-time-picker .gchoice input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.ssr-form .ssr-time-picker .gchoice label {
+	display: block;
+	text-align: center;
+	padding: 11px 8px;
+	border: 1px solid #E4DFD5;
+	border-radius: 4px;
+	background: var(--ssr-white);
+	color: var(--ssr-slate);
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 14px;
+	cursor: pointer;
+	transition: all 0.15s;
+	margin: 0;
+}
+
+.ssr-form .ssr-time-picker .gchoice input:checked + label {
+	border-color: var(--ssr-gold);
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+}
+
+.ssr-form .ssr-time-picker .gchoice input:focus-visible + label {
+	outline: 2px solid var(--ssr-gold);
+	outline-offset: 2px;
+}
+
+/* Next / Back buttons */
+.ssr-form .gform_wrapper .gform_page_footer {
+	display: flex;
+	gap: 12px;
+	border: none;
+	padding-top: 8px;
+}
+
+.ssr-form .gform_wrapper .gform_previous_button {
+	background: var(--ssr-white);
+	color: var(--ssr-charcoal);
+	border: 1px solid #E4DFD5;
+	border-radius: 6px;
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 15px;
+	padding: 14px 28px;
+	flex: 1;
+	cursor: pointer;
+}
+
+.ssr-form .gform_wrapper .gform_next_button,
+.ssr-form .gform_wrapper .gform_button {
+	flex: 2;
+}
+
+/* Submission confirmation */
+.ssr-form-thanks {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 48px;
+	text-align: center;
+}
+
+.ssr-form-thanks h3 {
+	font-family: var(--ssr-font-display);
+	font-size: 32px;
+	color: var(--ssr-charcoal);
+	margin: 0 0 16px;
+}
+
+.ssr-form-thanks p { color: var(--ssr-slate); font-size: 17px; margin: 0 0 12px; }
+
+.ssr-form-thanks .ssr-form-thanks-phone {
+	color: var(--ssr-gold);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	margin: 0;
+}
+
+/* Gravity Forms ships its own theme framework whose rules land after the child
+   theme stylesheet, so the layout-critical overrides below are forced. */
+.ssr-form .gform_wrapper .ssr-service-picker .gfield_checkbox {
+	display: grid !important;
+	grid-template-columns: repeat(2, 1fr) !important;
+	gap: 12px !important;
+}
+
+.ssr-form .gform_wrapper .ssr-service-picker .gchoice {
+	display: block !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.ssr-form .gform_wrapper .ssr-service-picker .gchoice label {
+	display: block !important;
+	width: 100% !important;
+	max-width: none !important;
+	margin: 0 !important;
+}
+
+.ssr-form .gform_wrapper .ssr-time-picker .gfield_radio {
+	display: flex !important;
+	gap: 10px !important;
+}
+
+.ssr-form .gform_wrapper .ssr-time-picker .gchoice label {
+	display: block !important;
+	width: 100% !important;
+	margin: 0 !important;
+}
+
+@media (max-width: 480px) {
+	.ssr-form .gform_wrapper .ssr-service-picker .gfield_checkbox {
+		grid-template-columns: 1fr !important;
+	}
+}
+
+/* Buttons in the brand palette rather than the Gravity default blue */
+.ssr-form .gform_wrapper .gform_next_button,
+.ssr-form .gform_wrapper .gform_button,
+.ssr-form .gform_wrapper input[type="submit"] {
+	background: var(--ssr-gold) !important;
+	color: var(--ssr-navy) !important;
+	border: none !important;
+	border-radius: 6px !important;
+	font-family: var(--ssr-font-ui) !important;
+	font-weight: 700 !important;
+	font-size: 15px !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.05em !important;
+	padding: 15px 36px !important;
+	cursor: pointer;
+}
+
+.ssr-form .gform_wrapper .gform_next_button:hover,
+.ssr-form .gform_wrapper .gform_button:hover,
+.ssr-form .gform_wrapper input[type="submit"]:hover {
+	background: var(--ssr-gold-hover) !important;
+}
+
+.ssr-form .gform_wrapper .gform_previous_button {
+	background: var(--ssr-white) !important;
+	color: var(--ssr-charcoal) !important;
+	border: 1px solid #E4DFD5 !important;
+	text-transform: none !important;
+	letter-spacing: 0 !important;
+}
+
+/* Field labels follow the design's uppercase UI style */
+.ssr-form .gform_wrapper .gfield_label,
+.ssr-form .gform_wrapper legend.gfield_label {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 13px;
+	color: var(--ssr-charcoal);
+	margin-bottom: 6px;
+}
+
+.ssr-form .gform_wrapper .gfield { margin-bottom: 20px; }
+
+/* ==========================================================================
+   Service pages
+   ========================================================================== */
+.ssr-narrow > .e-con-inner { max-width: 1100px; }
+
+/* Service-page sections use a fixed 32px gutter (`padding: '0 32px'` in the
+   source), not the fluid clamp the Home page's `.ssr-boxed` carries. */
+.ssr-pad32 > .e-con-inner {
+	padding-left: 32px;
+	padding-right: 32px;
+}
+
+/* Service-page grids follow App.tsx exactly: N columns down to 768px, then one
+   column — there is no tablet step in the source. `.ssr-tab2` is `col-2-tablet`
+   and keeps two columns through the 481–768 band.
+   These are deliberately separate from the Home page's `.ssr-grid-N`, which
+   collapses at 900px and is verified in place; see HANDOFF §3.1. */
+.ssr-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.ssr-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.ssr-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.ssr-cols-5 { grid-template-columns: repeat(5, 1fr); }
+.ssr-grid-7 { grid-template-columns: repeat(7, 1fr); }
+
+@media (max-width: 768px) {
+	.ssr-cols-2,
+	.ssr-cols-3,
+	.ssr-cols-4,
+	.ssr-cols-5 { grid-template-columns: 1fr; }
+	/* `.ssr-tab2` is declared last on purpose — it is the `col-2-tablet`
+	   modifier and must beat the base collapse in the 481–768 band. */
+	.ssr-tab2 { grid-template-columns: 1fr 1fr; }
+	.ssr-grid-7 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+	.ssr-tab2 { grid-template-columns: 1fr; }
+	.ssr-grid-7 { grid-template-columns: 1fr; }
+}
+
+/* A few sections use the fluid gutter instead of the fixed 32px one. */
+.ssr-padfluid32 > .e-con-inner {
+	padding-left: clamp(20px, 4vw, 32px);
+	padding-right: clamp(20px, 4vw, 32px);
+}
+
+/* Grid rows that centre their cells rather than aligning to the top. */
+.ssr-align-center { align-items: center; }
+
+/* Hero sub-heading is capped at 480px in <PageHero>. The cap goes on the
+   paragraph, not the widget: Elementor's own `max-width:100%` on the element
+   wrapper outranks a single-class rule there. */
+.ssr-max-480 p { max-width: 480px; }
+
+/* Hero trust chips — an inline icon list with a faint interpunct separator,
+   exactly as <PageHero> composes them. */
+.ssr-hero-chips.elementor-widget-icon-list .elementor-icon-list-items {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+}
+
+.ssr-hero-chips.elementor-widget-icon-list .elementor-icon-list-item {
+	margin: 0;
+	align-items: center;
+}
+
+.ssr-hero-chips.elementor-widget-icon-list .elementor-icon-list-item + .elementor-icon-list-item::before {
+	content: '·';
+	color: rgba(255, 255, 255, 0.25);
+	margin-right: 7px;
+}
+
+/* Breadcrumb bar */
+.ssr-breadcrumb { border-bottom: 1px solid #E4DFD5; }
+
+/* Related-service cards are whole-card links. */
+.ssr-link-card { text-decoration: none; }
+
+/* Symptom checker (custom widget) */
+.ssr-sc { display: contents; }
+
+/* The widget renders its list and its verdict panel as two `display:contents`
+   siblings, so both land directly in this grid alongside the intro copy. That
+   reproduces the source's layout — intro over list in column one, verdict
+   spanning both rows in column two — without wrapping the widget in a column
+   it cannot see. Row gap is zero; the 32px under the intro is the paragraph's
+   own margin, as in the source. */
+.ssr-sc-grid {
+	grid-template-columns: 1fr 1fr;
+	column-gap: 64px;
+	row-gap: 0;
+	align-items: start;
+}
+
+.ssr-sc-grid > .elementor-widget-ssr-symptom-checker,
+.ssr-sc-grid > .elementor-widget-ssr-symptom-checker > .elementor-widget-container {
+	display: contents;
+}
+
+.ssr-sc-grid > .ssr-sc-intro { grid-column: 1; grid-row: 1; }
+.ssr-sc-grid .ssr-sc-list { grid-column: 1; grid-row: 2; }
+.ssr-sc-grid .ssr-sc-verdict { grid-column: 2; grid-row: 1 / span 2; }
+
+@media (max-width: 768px) {
+	.ssr-sc-grid { grid-template-columns: 1fr; }
+
+	.ssr-sc-grid > .ssr-sc-intro,
+	.ssr-sc-grid .ssr-sc-list,
+	.ssr-sc-grid .ssr-sc-verdict {
+		grid-column: 1;
+		grid-row: auto;
+	}
+
+	.ssr-sc-grid .ssr-sc-verdict { margin-top: 64px; }
+}
+
+.ssr-sc-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ssr-sc-item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 14px 18px;
+	background: var(--ssr-white);
+	border: 2px solid #E4DFD5;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	margin: 0;
+}
+
+.ssr-sc-item.is-checked {
+	background: rgba(233, 168, 37, 0.08);
+	border-color: var(--ssr-gold);
+}
+
+.ssr-sc-item input { position: absolute; opacity: 0; pointer-events: none; }
+
+.ssr-sc-box {
+	width: 22px;
+	height: 22px;
+	border-radius: 4px;
+	flex-shrink: 0;
+	background: var(--ssr-white);
+	border: 2px solid #C8C4BC;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.15s ease;
+}
+
+.ssr-sc-item.is-checked .ssr-sc-box {
+	background: var(--ssr-gold);
+	border-color: var(--ssr-gold);
+}
+
+.ssr-sc-item.is-checked .ssr-sc-box::after {
+	content: '';
+	width: 12px;
+	height: 7px;
+	border-left: 2.2px solid var(--ssr-navy);
+	border-bottom: 2.2px solid var(--ssr-navy);
+	transform: rotate(-45deg) translate(1px, -1px);
+}
+
+.ssr-sc-item input:focus-visible + .ssr-sc-box {
+	outline: 2px solid var(--ssr-gold);
+	outline-offset: 2px;
+}
+
+.ssr-sc-text { font-family: var(--ssr-font-body); font-size: 16px; color: var(--ssr-charcoal); }
+.ssr-sc-item.is-checked .ssr-sc-text { font-weight: 600; }
+
+.ssr-sc-verdict {
+	--ssr-sc-color: var(--ssr-gold);
+	border: 2px solid var(--ssr-sc-color);
+	border-radius: 10px;
+	padding: 36px 32px;
+	background: var(--ssr-white);
+	transition: all 0.25s ease;
+	position: sticky;
+	top: 100px;
+}
+
+.ssr-sc-verdict-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+
+.ssr-sc-dot {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--ssr-sc-color);
+	flex-shrink: 0;
+}
+
+.ssr-sc-label {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--ssr-sc-color);
+}
+
+/* Qualified past the Kit's `.elementor-kit-1 h3` (0,1,1), which otherwise
+   wins over a single-class rule and renders this at the global h3 size. */
+.ssr-sc-verdict .ssr-sc-title {
+	font-family: var(--ssr-font-display);
+	font-size: 32px;
+	color: var(--ssr-charcoal);
+	text-transform: uppercase;
+	margin: 0 0 14px;
+	line-height: 1.05;
+}
+
+.ssr-sc-desc { color: var(--ssr-slate); font-size: 16px; line-height: 1.7; margin: 0 0 28px; }
+
+.ssr-sc-count {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	background: var(--ssr-bone);
+	border-radius: 6px;
+	padding: 12px 16px;
+}
+
+.ssr-sc-num { font-family: var(--ssr-font-display); font-size: 40px; color: var(--ssr-sc-color); }
+.ssr-sc-of { font-family: var(--ssr-font-ui); font-size: 14px; color: var(--ssr-slate); }
+
+.ssr-sc-cta {
+	display: block;
+	margin-top: 20px;
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 14px 24px;
+	border-radius: 6px;
+	text-decoration: none;
+	text-align: center;
+}
+
+.ssr-sc-cta[hidden] { display: none; }
+
+@media (max-width: 768px) {
+	.ssr-sc-verdict { position: static; }
+}
+
+/* Comparison table */
+.ssr-table {
+	border-radius: 8px;
+	overflow: auto;
+	border: 1px solid #E4DFD5;
+}
+
+.ssr-table-row {
+	display: grid;
+	grid-template-columns: 160px repeat(5, 1fr);
+	min-width: 560px;
+	padding: 20px 24px;
+	gap: 16px;
+	align-items: center;
+	border-top: 1px solid #E4DFD5;
+}
+
+.ssr-table-head {
+	background: var(--ssr-charcoal);
+	padding: 16px 24px;
+	border-top: none;
+	position: sticky;
+	top: 0;
+	z-index: 2;
+}
+
+/* Zebra striping is carried on an explicit class per row. `nth-of-type` cannot
+   do it here: the sticky header is the first element child, so it shifts the
+   parity of every body row, and `nth-child(… of …)` is not safe to rely on. */
+.ssr-table-row.ssr-row-white { background: var(--ssr-white); }
+.ssr-table-row.ssr-row-bone  { background: var(--ssr-bone); }
+
+/* Dark feature cards (window styles) */
+.ssr-dark-card {
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	padding: 32px 28px;
+	text-align: center;
+	align-items: center;
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ssr-dark-card:hover {
+	border-color: rgba(233, 168, 37, 0.38);
+	background: rgba(233, 168, 37, 0.05);
+}
+
+.ssr-dark-card svg { display: block; margin: 0 auto; }
+
+/* Small stat tiles */
+.ssr-stat {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 6px;
+	padding: 16px 18px;
+}
+
+/* Callout box inside the replacement-method tabs */
+.ssr-callout {
+	background: rgba(233, 168, 37, 0.07);
+	border: 1px solid rgba(233, 168, 37, 0.25);
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+/* Diagram panel */
+.ssr-diagram {
+	border-radius: 10px;
+	overflow: hidden;
+	background: var(--ssr-charcoal);
+	padding: 32px;
+	min-height: 300px;
+}
+
+.ssr-diagram svg { display: block; width: 100%; height: auto; }
+
+.ssr-panel {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 10px;
+	padding: 28px 24px;
+	text-align: center;
+}
+
+/* Related-service link cards */
+.ssr-link-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 28px 28px 24px;
+	box-shadow: 0 4px 16px rgba(20, 23, 28, 0.05);
+	transition: box-shadow 0.15s ease;
+}
+
+.ssr-link-card:hover { box-shadow: 0 8px 32px rgba(20, 23, 28, 0.12); }
+
+/* Split with a fixed right rail — `.fixed-right` in the Make source, which
+   collapses at 768px like every other grid there, not at 900px. */
+.ssr-split-rail { grid-template-columns: 1fr 320px; align-items: flex-start; }
+
+/* The rail's panel is `display:inline-block` inside a centred column in the
+   source, i.e. it shrinks to its content rather than filling the 320px rail. */
+.ssr-rail-col { align-items: center; }
+
+@media (max-width: 768px) {
+	.ssr-split-rail { grid-template-columns: 1fr; }
+}
+
+/* ── Replacement-method tabs — Elementor's native nested tabs ──────────────
+   The source puts the toggle inside the left column, level with the top of the
+   right-hand copy. Nested tabs render heading and content as siblings, so the
+   widget's own custom properties are used to flatten the content wrapper and
+   the active panel to `display:contents`; both panel children then become
+   items of one grid and can be placed exactly where the design has them.
+   `--n-tabs-content-display` is Elementor's own hook for this. */
+.ssr-method-tabs {
+	--n-tabs-content-display: contents;
+	--n-tabs-gap: 0px;
+	--n-tabs-title-gap: 0px;
+	--n-tabs-title-font-size: 13px;
+	--n-tabs-title-padding-top: 10px;
+	--n-tabs-title-padding-bottom: 10px;
+	--n-tabs-title-padding-left: 28px;
+	--n-tabs-title-padding-right: 28px;
+	--n-tabs-title-border-radius: 6px;
+	--n-tabs-title-background-color: transparent;
+	--n-tabs-title-background-color-hover: transparent;
+	--n-tabs-title-background-color-active: var(--ssr-gold);
+	--n-tabs-title-color: var(--ssr-slate);
+	--n-tabs-title-color-hover: var(--ssr-charcoal);
+	--n-tabs-title-color-active: var(--ssr-navy);
+}
+
+.ssr-method-tabs .e-n-tabs-content > .e-con.e-active,
+.ssr-method-tabs .e-n-tabs:not(.e-activated) > .e-n-tabs-content > .e-con:first-child {
+	display: contents;
+}
+
+/* The toggle track itself — a bone pill wrapping both buttons. */
+.ssr-method-tabs .e-n-tabs-heading {
+	background: var(--ssr-bone);
+	border-radius: 8px;
+	padding: 4px;
+	width: fit-content;
+	justify-self: start;
+	align-self: start;
+	margin-bottom: 36px;
+}
+
+.ssr-method-tabs .e-n-tabs-heading button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+@media (min-width: 769px) {
+	.ssr-method-tabs { --n-tabs-display: grid; }
+
+	.ssr-method-tabs .e-n-tabs {
+		grid-template-columns: 1fr 1fr;
+		column-gap: 64px;
+		align-items: start;
+	}
+
+	.ssr-method-tabs .e-n-tabs-heading { grid-column: 1; grid-row: 1; }
+	.ssr-method-tabs .ssr-method-cutaway { grid-column: 1; grid-row: 2; }
+	.ssr-method-tabs .ssr-method-info { grid-column: 2; grid-row: 1 / span 2; }
+}
+
+/* ==========================================================================
+   Before / After slider (custom widget — no Elementor Pro equivalent exists)
+   ========================================================================== */
+.ssr-ba {
+	--ssr-ba-pos: 50%;
+	position: relative;
+	width: 100%;
+	height: clamp(300px, 38vw, 520px);
+	background: var(--ssr-charcoal);
+	overflow: hidden;
+	user-select: none;
+	touch-action: none;
+	cursor: ew-resize;
+}
+
+.ssr-ba img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+}
+
+.ssr-ba-clip {
+	position: absolute;
+	inset: 0;
+	width: var(--ssr-ba-pos);
+	overflow: hidden;
+}
+
+/* The clipped image keeps the full container width so it does not squash.
+   `max-width: none` is required: the theme's global `img { max-width: 100% }`
+   otherwise clamps it back to the clip's width, which horizontally compressed
+   the before photo and made the two halves look like different rooms. */
+.ssr-ba-clip .ssr-ba-before {
+	width: 100cqw;
+	max-width: none;
+}
+
+.ssr-ba { container-type: inline-size; }
+
+.ssr-ba-tint {
+	position: absolute;
+	inset: 0;
+	background: rgba(14, 17, 22, 0.22);
+}
+
+.ssr-ba-label {
+	position: absolute;
+	top: 18px;
+	padding: 4px 11px;
+	font-family: var(--ssr-font-ui);
+	font-size: 11px;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	border-radius: 4px;
+	z-index: 3;
+}
+
+.ssr-ba-label-before {
+	left: 18px;
+	background: rgba(14, 17, 22, 0.82);
+	color: var(--ssr-white);
+	font-weight: 600;
+}
+
+.ssr-ba-label-after {
+	right: 18px;
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-weight: 700;
+}
+
+.ssr-ba-line {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--ssr-ba-pos);
+	width: 2px;
+	background: var(--ssr-gold);
+	transform: translateX(-50%);
+	z-index: 4;
+	pointer-events: none;
+}
+
+.ssr-ba-handle {
+	position: absolute;
+	top: 50%;
+	left: var(--ssr-ba-pos);
+	transform: translate(-50%, -50%);
+	width: 50px;
+	height: 50px;
+	background: var(--ssr-gold);
+	border: 3px solid var(--ssr-white);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: grab;
+	z-index: 10;
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+	padding: 0;
+}
+
+/* The Elementor Kit styles every raw <button> — `.elementor-kit-1 button`
+   sets border-radius 6px and padding 15px 28px at (0,2,0), which outranks a
+   single class. That squared off the handle and, worse, the 56px of inline
+   padding crushed the chevron SVG to zero width. Qualifying with the tag
+   puts these four properties at (0,2,1) so they win outright. */
+.ssr-ba button.ssr-ba-handle {
+	width: 50px;
+	height: 50px;
+	padding: 0;
+	border-radius: 50%;
+}
+
+.ssr-ba-handle:active { cursor: grabbing; }
+
+.ssr-ba-handle:focus-visible {
+	outline: 3px solid var(--ssr-white);
+	outline-offset: 3px;
+}
+
+.ssr-ba-hint {
+	position: absolute;
+	bottom: 14px;
+	left: 50%;
+	transform: translateX(-50%);
+	color: rgba(255, 255, 255, 0.55);
+	font-family: var(--ssr-font-ui);
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.12em;
+	pointer-events: none;
+	z-index: 4;
+}
+
+/* Centred section intro copy is capped at 560px in the design */
+.ssr-center-narrow {
+	max-width: 560px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* ==========================================================================
+   Design-system corrections
+   Two Elementor defaults fight the Figma source on every section, so they are
+   neutralised once here rather than overridden container by container.
+   ========================================================================== */
+
+/* Elementor gives every container 10px of vertical padding by default. The
+   design source has none — all vertical rhythm comes from explicit section
+   padding — so the default alone put ~20px of drift into each nested section.
+   Both axes are reset. The design's horizontal gutters come from `.ssr-boxed`
+   (`0 clamp(20px, 4vw, 48px)`), not from this default — leaving the inline
+   default in place inset every full-bleed child by 10px, which is what kept
+   the gallery caption bars from reaching their tiles' edges. */
+:root {
+	--container-default-padding-top: 0px;
+	--container-default-padding-bottom: 0px;
+	--container-default-padding-left: 0px;
+	--container-default-padding-right: 0px;
+}
+
+/* A text-editor widget's final paragraph keeps the browser's bottom margin,
+   which the design source does not have — spacing there is carried by the
+   widget's own margin. Inter-paragraph spacing inside a block is left alone. */
+.elementor-widget-text-editor p:last-child {
+	margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Service cards — Loop Grid
+   The grid is rendered by Elementor Pro's Loop Grid from the Services post
+   type; these rules give the loop the same 4-column geometry the hand-built
+   grid had, matching the Figma source (4 × 275.5px with a 14px gutter).
+   ========================================================================== */
+.ssr-svc-loop .elementor-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	/* Elementor's grid gap comes from these variables; setting `gap` alone
+	   loses to its own `column-gap: var(--grid-column-gap, 30px)` rule. */
+	--grid-column-gap: 14px;
+	--grid-row-gap: 14px;
+	gap: 14px;
+}
+
+/* Loop Grid wraps each item in a link; the card fills it edge to edge. */
+.ssr-svc-loop .e-loop-item {
+	display: flex;
+}
+
+.ssr-svc-loop .e-loop-item > .elementor {
+	width: 100%;
+}
+
+/* `col-4 col-2-tablet` in the spec: 4 columns above 768, 2 down to 480, then 1. */
+@media (max-width: 768px) {
+	.ssr-svc-loop .elementor-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 480px) {
+	.ssr-svc-loop .elementor-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ==========================================================================
+   Siding page
+   ========================================================================== */
+
+/* The Siding hero overrides <PageHero>'s default overlay with a slightly
+   heavier one (0.93 / 0.68 / 0.12 against the default 0.92 / 0.65 / 0.15). */
+.ssr-page-hero--storm::before {
+	background:
+		linear-gradient(to bottom, rgba(14,17,22,0.2) 0%, transparent 20%, transparent 80%, rgba(14,17,22,0.4) 100%),
+		linear-gradient(90deg, rgba(14,17,22,0.93) 0%, rgba(14,17,22,0.68) 45%, rgba(14,17,22,0.12) 80%);
+}
+
+/* ── Hail damage module ───────────────────────────────────────────────────
+   Elementor Pro's Hotspot widget, restyled into the source's numbered gold
+   pins. The source's own <style> block switches to the accordion at exactly
+   768px, so the two variants are toggled here rather than with Elementor's
+   responsive visibility (which would use the Kit's 767px mobile step). */
+.ssr-hail-desktop {
+	position: relative;
+	border-radius: 10px;
+	overflow: hidden;
+	max-width: 860px;
+	margin-inline: auto;
+}
+
+.ssr-hail-mobile { display: none; }
+
+@media (max-width: 768px) {
+	.ssr-hail-desktop { display: none; }
+	.ssr-hail-mobile { display: block; }
+}
+
+.ssr-hail-hotspot img { filter: brightness(0.72); width: 100%; }
+
+/* Elementor anchors a hotspot by translating it by its *offset* percentage,
+   which only centres the pin at an offset of 50%. The source centres every
+   pin on its point, so the translation is pinned to 50% here. Four classes
+   deep to clear Elementor's own (0,3,0) per-item rule. */
+.elementor .elementor-widget-hotspot.ssr-hail-hotspot .e-hotspot {
+	--hotspot-translate-x: 50%;
+	--hotspot-translate-y: 50%;
+}
+
+/* Four classes deep so the dot beats Elementor's own
+   `.e-hotspot:not(.e-hotspot--circle) .e-hotspot__button` (0,3,0), which
+   otherwise re-imposes the default 3px box radius and box colour. */
+.elementor .elementor-widget-hotspot.ssr-hail-hotspot .e-hotspot__button {
+	box-sizing: border-box;
+	width: 38px;
+	height: 38px;
+	min-width: 38px;
+	min-height: 38px;
+	padding: 0;
+	border-radius: 50%;
+	background: rgba(233, 168, 37, 0.22);
+	border: 2px solid var(--ssr-gold);
+	color: var(--ssr-gold);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.18s ease;
+}
+
+.elementor .elementor-widget-hotspot.ssr-hail-hotspot .e-hotspot--active .e-hotspot__button {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	box-shadow: 0 0 0 6px rgba(233, 168, 37, 0.25);
+}
+
+.ssr-hail-hotspot .e-hotspot__tooltip {
+	background: rgba(20, 23, 28, 0.97);
+	border: 1px solid rgba(233, 168, 37, 0.25);
+	border-radius: 8px;
+	padding: 14px 16px;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+	white-space: normal;
+	text-align: left;
+}
+
+.ssr-hail-tip-head {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.ssr-hail-tip-num {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	border-radius: 50%;
+	width: 22px;
+	height: 22px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	flex-shrink: 0;
+}
+
+.ssr-hail-tip-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	color: var(--ssr-gold);
+}
+
+.ssr-hail-tip-body {
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 13px;
+	line-height: 1.65;
+	margin: 0;
+	font-family: var(--ssr-font-body);
+}
+
+.ssr-hail-caption.elementor-widget-heading {
+	position: absolute;
+	bottom: 14px;
+	right: 14px;
+	z-index: 5;
+	width: auto;
+	background: rgba(20, 23, 28, 0.82);
+	padding: 5px 12px;
+	border-radius: 4px;
+	margin: 0;
+}
+
+/* Dark accordion variant used for the mobile pin list. */
+.ssr-hail-acc .elementor-accordion { border-color: rgba(255, 255, 255, 0.1); }
+
+.ssr-hail-acc .elementor-accordion .elementor-accordion-item {
+	border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.ssr-hail-acc .elementor-tab-title { background: rgba(255, 255, 255, 0.04); }
+.ssr-hail-acc .elementor-tab-title.elementor-active { background: rgba(233, 168, 37, 0.12); }
+
+.ssr-hail-acc .elementor-tab-title .elementor-accordion-title {
+	color: var(--ssr-white);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+}
+
+.ssr-hail-acc .elementor-tab-title.elementor-active .elementor-accordion-title { color: var(--ssr-gold); }
+
+.ssr-hail-acc .elementor-tab-content {
+	background: rgba(233, 168, 37, 0.06);
+	color: rgba(255, 255, 255, 0.78);
+	font-size: 14px;
+	line-height: 1.65;
+}
+
+/* ── Repair / replace checklist ───────────────────────────────────────────── */
+.ssr-rr-item {
+	padding: 18px 22px;
+	border-radius: 6px;
+	background: rgba(233, 168, 37, 0.035);
+	border: 1px solid rgba(233, 168, 37, 0.19);
+}
+
+.ssr-rr-item--replace {
+	background: rgba(196, 70, 47, 0.035);
+	border-color: rgba(196, 70, 47, 0.19);
+}
+
+.ssr-rr-icon { flex-shrink: 0; line-height: 0; }
+.ssr-rr-icon svg { display: block; }
+
+.ssr-rr-tag.elementor-widget-heading {
+	flex-shrink: 0;
+	width: auto;
+	padding: 4px 10px;
+	border-radius: 999px;
+	background: var(--ssr-gold);
+}
+
+.ssr-rr-item--replace .ssr-rr-tag.elementor-widget-heading { background: var(--ssr-alert, #C4462F); }
+
+/* ── Materials cards + rating bars ────────────────────────────────────────── */
+.ssr-mat-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 28px 32px;
+	box-shadow: 0 4px 16px rgba(20, 23, 28, 0.05);
+	overflow-x: auto;
+}
+
+.ssr-mat-grid {
+	grid-template-columns: 220px 1fr 1fr 1fr;
+	align-items: center;
+	min-width: 560px;
+}
+
+/* <RatingBar> always reserves an 80px label column, even when the label is
+   empty — which is how this page calls it. */
+.ssr-rating { align-items: center; }
+.ssr-rating::before { content: ''; width: 80px; flex: 0 0 80px; }
+
+.ssr-rating-track {
+	flex: 1 1 auto;
+	height: 8px;
+	background: #E4DFD5;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.ssr-rating-fill { height: 100%; background: var(--ssr-gold); border-radius: 4px; }
+.ssr-rf-1 { width: 20%; }
+.ssr-rf-2 { width: 40%; }
+.ssr-rf-3 { width: 60%; }
+.ssr-rf-4 { width: 80%; }
+.ssr-rf-5 { width: 100%; }
+
+.ssr-rating-val.elementor-widget-heading { flex: 0 0 28px; width: 28px; }
+
+/* ── Fiber-cement split ───────────────────────────────────────────────────── */
+.ssr-fc-img {
+	border-radius: 10px;
+	overflow: hidden;
+	box-shadow: 0 16px 48px rgba(20, 23, 28, 0.15);
+}
+
+.ssr-fc-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.ssr-alert-callout {
+	background: rgba(196, 70, 47, 0.05);
+	border: 1px solid rgba(196, 70, 47, 0.19);
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+/* ── Insurance claim timeline ─────────────────────────────────────────────── */
+.ssr-ins-timeline { position: relative; }
+
+.ssr-ins-timeline::before {
+	content: '';
+	position: absolute;
+	top: 28px;
+	left: 28px;
+	right: 28px;
+	height: 2px;
+	background: linear-gradient(to right, var(--ssr-gold), rgba(233, 168, 37, 0.19));
+	z-index: 0;
+}
+
+.ssr-ins-step {
+	flex: 1 1 0;
+	min-width: 140px;
+	padding: 0 12px;
+	position: relative;
+	z-index: 1;
+}
+
+.ssr-ins-num {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--ssr-navy);
+	border: 3px solid var(--ssr-gold);
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.ssr-ins-num .elementor-widget { width: auto; margin: 0; }
+
+/* ==========================================================================
+   Countertops & Cabinets page
+   ========================================================================== */
+
+/* Sections here use a 1200px column and a 16→32px fluid gutter. */
+.ssr-pad1632 > .e-con-inner {
+	padding-left: clamp(16px, 3vw, 32px);
+	padding-right: clamp(16px, 3vw, 32px);
+}
+
+/* This page's hero overlay runs on the diagonal, not left-to-right. */
+.ssr-page-hero--diag::before {
+	background:
+		linear-gradient(to bottom, rgba(14,17,22,0.2) 0%, transparent 20%, transparent 80%, rgba(14,17,22,0.4) 100%),
+		linear-gradient(135deg, rgba(14,17,22,0.88) 0%, rgba(14,17,22,0.55) 55%, rgba(14,17,22,0.1) 100%);
+}
+
+.ssr-grid-6 { grid-template-columns: repeat(6, 1fr); }
+
+@media (max-width: 768px) { .ssr-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .ssr-grid-6 { grid-template-columns: 1fr; } }
+
+.ssr-split-380 { grid-template-columns: 1fr 380px; align-items: start; }
+.ssr-cols-2fr1 { grid-template-columns: 2fr 1fr; }
+
+@media (max-width: 768px) {
+	.ssr-split-380,
+	.ssr-cols-2fr1 { grid-template-columns: 1fr; }
+}
+
+/* ── Chip selectors (Elementor Pro nested tabs) ───────────────────────────
+   The tab list is the chip row; each panel is that chip's detail block. The
+   widget's own custom properties do the styling, so no override is needed. */
+.ssr-chip-tabs {
+	--n-tabs-gap: 36px;
+	--n-tabs-title-gap: 10px;
+	--n-tabs-heading-wrap: wrap;
+	--n-tabs-heading-justify-content: flex-start;
+	--n-tabs-title-font-size: 14px;
+	--n-tabs-title-padding-top: 10px;
+	--n-tabs-title-padding-bottom: 10px;
+	--n-tabs-title-padding-left: 22px;
+	--n-tabs-title-padding-right: 22px;
+	--n-tabs-title-border-radius: 99px;
+	--n-tabs-title-background-color: var(--ssr-white);
+	--n-tabs-title-color: var(--ssr-charcoal);
+	--n-tabs-title-color-hover: var(--ssr-charcoal);
+}
+
+.ssr-chip-tabs .e-n-tabs-heading button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	border: 2px solid #D6D0C4;
+	transition: all 0.15s;
+}
+
+.ssr-chip-tabs--gold {
+	--n-tabs-title-background-color-active: var(--ssr-gold);
+	--n-tabs-title-background-color-hover: var(--ssr-white);
+	--n-tabs-title-color-active: var(--ssr-navy);
+}
+
+.ssr-chip-tabs--gold .e-n-tabs-heading button {
+	letter-spacing: 0.04em;
+}
+
+.ssr-chip-tabs--gold .e-n-tabs-heading button[aria-selected="true"] { border-color: var(--ssr-gold); }
+
+.ssr-chip-tabs--navy {
+	--n-tabs-title-background-color-active: var(--ssr-navy);
+	--n-tabs-title-background-color-hover: var(--ssr-white);
+	--n-tabs-title-color-active: var(--ssr-white);
+}
+
+.ssr-chip-tabs--navy .e-n-tabs-heading button[aria-selected="true"] { border-color: var(--ssr-navy); }
+
+/* ── Material render + spec panel ─────────────────────────────────────────── */
+.ssr-mat-render {
+	position: relative;
+	border-radius: 10px;
+	overflow: hidden;
+	min-height: 420px;
+}
+
+.ssr-mat-photo,
+.ssr-mat-photo > .elementor-widget-container,
+.ssr-mat-photo img {
+	height: 100%;
+	width: 100%;
+}
+
+.ssr-mat-photo img {
+	min-height: 420px;
+	object-fit: cover;
+	display: block;
+}
+
+.ssr-mat-caption {
+	position: absolute;
+	inset: auto 0 0 0;
+	padding: 40px 28px 24px;
+	background: linear-gradient(to top, rgba(14, 17, 22, 0.82) 0%, transparent 100%);
+	z-index: 2;
+}
+
+.ssr-spec-panel {
+	background: var(--ssr-white);
+	border-radius: 10px;
+	padding: 32px 28px;
+	border: 1px solid #E4DFD5;
+	box-shadow: 0 8px 24px rgba(20, 23, 28, 0.07);
+}
+
+.ssr-spec-note { border-top: 1px solid #E4DFD5; padding-top: 20px; }
+
+.ssr-spec-cta .elementor-button { display: block; width: 100%; }
+
+/* Labelled rating rows keep the same 80px label column. */
+.ssr-rating-label.elementor-widget-heading { flex: 0 0 80px; width: 80px; }
+.ssr-rating--nolabel::before { content: ''; width: 80px; flex: 0 0 80px; }
+.ssr-rating:not(.ssr-rating--nolabel)::before { content: none; }
+
+/* ── Granite vs quartz ────────────────────────────────────────────────────── */
+.ssr-vs-grid {
+	border: 1px solid #E4DFD5;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.ssr-vs-col { padding: 40px 36px; }
+.ssr-vs-col--granite { border-right: 1px solid #E4DFD5; }
+.ssr-vs-col--quartz { background: #FAFCFF; }
+
+@media (max-width: 768px) {
+	.ssr-vs-col--granite { border-right: none; border-bottom: 1px solid #E4DFD5; }
+}
+
+.ssr-vs-badge {
+	align-self: flex-start;
+	width: auto;
+	border-radius: 6px;
+	padding: 6px 16px;
+}
+
+.ssr-vs-badge--gold { background: #FDF3DE; }
+.ssr-vs-badge--navy { background: rgba(20, 41, 77, 0.09); }
+
+.ssr-pro-mark.elementor-widget-heading { flex: 0 0 auto; width: auto; }
+
+.ssr-vs-callout { border-radius: 6px; padding: 16px 18px; }
+.ssr-vs-callout--gold { background: #FDF3DE; }
+.ssr-vs-callout--navy { background: rgba(20, 41, 77, 0.06); }
+
+/* ── Hard-water callout ───────────────────────────────────────────────────── */
+.ssr-hardwater { border-top: 3px solid var(--ssr-gold); }
+
+/* `.elementor` prefix: Elementor's own `.e-con` rule sets flex-shrink at the
+   same specificity and lands later, so a bare class lets these shrink. */
+.elementor .ssr-hw-icon {
+	flex: 0 0 52px;
+	width: 52px;
+	height: 52px;
+	background: var(--ssr-gold);
+	border-radius: 50%;
+	align-items: center;
+	justify-content: center;
+}
+
+.elementor .ssr-hw-icon .elementor-widget { width: auto; margin: 0; line-height: 0; }
+
+.ssr-hw-card {
+	background: var(--ssr-white);
+	border-radius: 8px;
+	padding: 16px 18px;
+	border: 1px solid #E8DFC6;
+}
+
+/* ── Cabinet tier cards ───────────────────────────────────────────────────── */
+.ssr-cab-card {
+	border-radius: 10px;
+	padding: 32px 28px;
+	border: 1px solid #E4DFD5;
+	position: relative;
+}
+
+.ssr-cab-card--bone { background: var(--ssr-bone); }
+.ssr-cab-card--gold { background: rgba(233, 168, 37, 0.08); }
+.ssr-cab-card--navy { background: rgba(20, 41, 77, 0.03); }
+.ssr-cab-card--hl { border: 2px solid var(--ssr-gold); }
+
+.ssr-cab-badge.elementor-widget-heading {
+	position: absolute;
+	top: -13px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: auto;
+	background: var(--ssr-gold);
+	padding: 4px 14px;
+	border-radius: 99px;
+	margin: 0;
+	z-index: 2;
+}
+
+/* ── Door style panel ─────────────────────────────────────────────────────── */
+.ssr-door-card {
+	background: var(--ssr-white);
+	border-radius: 10px;
+	padding: 36px 40px;
+	border: 1px solid #E4DFD5;
+}
+
+.ssr-door-badge {
+	align-self: flex-start;
+	width: auto;
+	background: #FDF3DE;
+	border-radius: 6px;
+	padding: 4px 14px;
+}
+
+.ssr-finish-row {
+	padding: 14px 16px;
+	background: var(--ssr-bone);
+	border-radius: 8px;
+	align-items: flex-start;
+}
+
+.ssr-finish-icon.elementor-widget-heading { flex: 0 0 auto; width: auto; }
+
+/* ── Image link cards ─────────────────────────────────────────────────────── */
+.ssr-linkhero {
+	position: relative;
+	border-radius: 10px;
+	overflow: hidden;
+	min-height: 260px;
+	justify-content: flex-end;
+	text-decoration: none;
+}
+
+.ssr-linkhero-img,
+.ssr-linkhero-img > .elementor-widget-container { position: static; }
+
+.ssr-linkhero-img img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ssr-linkhero::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.ssr-linkhero--primary::after {
+	background: linear-gradient(to top, rgba(14,17,22,0.9) 0%, rgba(14,17,22,0.3) 60%, transparent 100%);
+}
+
+.ssr-linkhero--secondary::after {
+	background: linear-gradient(to top, rgba(14,17,22,0.88) 0%, rgba(14,17,22,0.2) 70%, transparent 100%);
+}
+
+.ssr-linkhero-bar {
+	position: relative;
+	z-index: 2;
+	padding: 28px 32px;
+	width: 100%;
+}
+
+.ssr-linkhero-bar--sm { padding: 24px 28px; }
+
+.elementor .ssr-linkhero-arrow {
+	flex: 0 0 48px;
+	width: 48px;
+	height: 48px;
+	background: var(--ssr-gold);
+	border-radius: 50%;
+	align-items: center;
+	justify-content: center;
+}
+
+.elementor .ssr-linkhero-arrow .elementor-widget { width: auto; margin: 0; line-height: 0; }
+
+/* ==========================================================================
+   Component typography carried by the theme
+   --------------------------------------------------------------------------
+   Elementor stores every per-widget setting inside `_elementor_data`, and the
+   only route onto staging caps a single value at ~130 KB. Components that
+   repeat once per tab panel would blow that ceiling on their typography alone,
+   so from the Countertops page onward the repeated components carry their type
+   here instead. Each rule is qualified with the widget class, because
+   Elementor injects `.elementor-widget-heading .elementor-heading-title`
+   (0,2,0) inline and after this sheet.
+   ========================================================================== */
+
+.ssr-mat-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-mat-name.elementor-widget { margin-bottom: 4px; }
+
+.ssr-mat-price.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 28px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-white);
+}
+
+.ssr-spec-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-spec-title.elementor-widget { margin-bottom: 24px; }
+
+.ssr-spec-note-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-spec-note-h.elementor-widget { margin-bottom: 8px; }
+
+.ssr-spec-note-b.elementor-widget-text-editor { font-size: 15px; line-height: 1.7; color: var(--ssr-slate); }
+
+.elementor .ssr-spec-cta.elementor-widget { margin-top: 28px; }
+
+.ssr-spec-cta .elementor-button {
+	display: block;
+	width: 100%;
+	background: var(--ssr-navy);
+	color: var(--ssr-white);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 13px 0;
+	border-radius: 6px;
+	text-align: center;
+}
+
+.ssr-spec-cta .elementor-button:hover { background: #1e3a6b; color: var(--ssr-white); }
+
+.ssr-rating-label.elementor-widget-heading .elementor-heading-title,
+.ssr-rating-val.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-size: 13px;
+	line-height: 1.5;
+	text-transform: none;
+}
+
+.ssr-rating-label.elementor-widget-heading .elementor-heading-title { font-weight: 400; color: var(--ssr-slate); }
+.ssr-rating-val.elementor-widget-heading .elementor-heading-title { font-weight: 600; color: var(--ssr-charcoal); }
+
+/* ── Granite vs quartz ────────────────────────────────────────────────────── */
+.ssr-pro-mark.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.4;
+	text-transform: none;
+}
+
+.ssr-mark--gold.elementor-widget-heading .elementor-heading-title { color: var(--ssr-gold); }
+.ssr-mark--navy.elementor-widget-heading .elementor-heading-title { color: var(--ssr-navy); }
+.ssr-mark--alert.elementor-widget-heading .elementor-heading-title { color: #C4462F; }
+
+.ssr-pro-text.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 1.6;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+.ssr-vs-label.elementor-widget-heading .elementor-heading-title,
+.ssr-vs-callout-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.ssr-vs-label.elementor-widget-heading .elementor-heading-title { color: var(--ssr-charcoal); }
+.elementor .ssr-vs-label.elementor-widget { margin-bottom: 10px; }
+
+.elementor .ssr-vs-badge.e-con { margin-bottom: 20px; }
+
+.ssr-vs-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.5;
+	text-transform: uppercase;
+}
+
+.ssr-vs-badge--gold .ssr-vs-name .elementor-heading-title,
+.ssr-vs-callout--gold .ssr-vs-callout-h .elementor-heading-title { color: var(--ssr-gold); }
+
+.ssr-vs-badge--navy .ssr-vs-name .elementor-heading-title,
+.ssr-vs-callout--navy .ssr-vs-callout-h .elementor-heading-title { color: var(--ssr-navy); }
+
+.elementor .ssr-vs-callout-h.elementor-widget { margin-bottom: 6px; }
+
+.ssr-vs-callout-b.elementor-widget-text-editor { font-size: 15px; line-height: 1.65; color: var(--ssr-charcoal); }
+
+/* ── Hard-water cards ─────────────────────────────────────────────────────── */
+.ssr-hw-card-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-hw-card-h.elementor-widget { margin-bottom: 6px; }
+.ssr-hw-card-b.elementor-widget-text-editor { font-size: 14px; line-height: 1.7; color: var(--ssr-slate); }
+
+/* ── Cabinet tier cards ───────────────────────────────────────────────────── */
+.ssr-cab-tier.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-cab-price.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 28px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-gold);
+}
+
+.ssr-cab-time.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-cab-tier.elementor-widget,
+.elementor .ssr-cab-price.elementor-widget { margin-bottom: 6px; }
+.elementor .ssr-cab-time.elementor-widget { margin-bottom: 20px; }
+
+.ssr-cab-verdict.elementor-widget-text-editor {
+	font-size: 15px;
+	line-height: 1.7;
+	font-style: italic;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-cab-verdict.elementor-widget { margin-bottom: 12px; }
+.ssr-cab-note.elementor-widget-text-editor { font-size: 14px; line-height: 1.65; color: var(--ssr-slate); }
+
+.ssr-cab-badge.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-navy);
+}
+
+/* ── Door style panel ─────────────────────────────────────────────────────── */
+.elementor .ssr-door-badge.e-con { margin-bottom: 16px; }
+
+.ssr-door-badge .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.ssr-door-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 30px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-door-name.elementor-widget { margin-bottom: 16px; }
+.ssr-door-desc.elementor-widget-text-editor { font-size: 17px; line-height: 1.75; color: var(--ssr-slate); }
+.elementor .ssr-door-desc.elementor-widget { margin-bottom: 24px; }
+
+.ssr-door-cta .elementor-button {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 12px 28px;
+	border-radius: 6px;
+}
+
+.ssr-door-cta .elementor-button:hover { background: var(--ssr-gold-hover); color: var(--ssr-navy); }
+
+.ssr-finish-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-finish-h.elementor-widget { margin-bottom: 16px; }
+
+.ssr-finish-icon.elementor-widget-heading .elementor-heading-title {
+	font-size: 18px;
+	line-height: 1.5;
+	text-transform: none;
+}
+
+.ssr-finish-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-finish-name.elementor-widget { margin-bottom: 3px; }
+.ssr-finish-opts.elementor-widget-text-editor { font-size: 13px; line-height: 1.55; color: var(--ssr-slate); }
+
+/* ── Image link cards ─────────────────────────────────────────────────────── */
+.ssr-lh-eyebrow.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.ssr-lh-eyebrow--sm.elementor-widget-heading .elementor-heading-title {
+	font-size: 11px;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.elementor .ssr-lh-eyebrow.elementor-widget { margin-bottom: 6px; }
+.elementor .ssr-lh-eyebrow--sm.elementor-widget { margin-bottom: 4px; }
+
+.ssr-lh-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 28px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.ssr-lh-title--sm.elementor-widget-heading .elementor-heading-title { font-size: 22px; }
+
+/* ── Shared components, CSS-styled variants ───────────────────────────────── */
+.ssr-step-num.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-align: center;
+	color: var(--ssr-white);
+}
+
+.ssr-step-dur.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	text-align: center;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-step-dur.elementor-widget { margin-top: 12px; }
+
+.ssr-step-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	text-align: center;
+	color: var(--ssr-white);
+}
+
+.elementor .ssr-step-title.elementor-widget { margin: 6px 0 8px; }
+
+.ssr-step-body.elementor-widget-text-editor {
+	font-size: 13px;
+	line-height: 1.65;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+/* Process steps sitting on a light background invert those two colours. */
+.ssr-steps-light .ssr-step-title .elementor-heading-title { color: var(--ssr-charcoal); }
+.ssr-steps-light .ssr-step-body { color: var(--ssr-slate); }
+
+.ssr-cost-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-cost-label.elementor-widget { margin-bottom: 10px; }
+
+.ssr-cost-range.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 32px;
+	line-height: 1;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-cost-range .elementor-heading-title span { font-size: 20px; color: var(--ssr-slate); }
+.elementor .ssr-cost-range.elementor-widget { margin-bottom: 6px; }
+.ssr-cost-note.elementor-widget-text-editor { font-size: 13px; line-height: 1.6; color: var(--ssr-slate); }
+
+.elementor .ssr-link-head.e-con { margin-bottom: 8px; }
+
+.ssr-link-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 20px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-link-desc.elementor-widget-text-editor { font-size: 14px; line-height: 1.6; color: var(--ssr-slate); }
+
+/* ==========================================================================
+   Gutters page
+   ========================================================================== */
+
+/* This page writes its own dark section headers rather than <SectionHeader>:
+   a larger h2 clamp, 12px under the heading, 48px under the lede. */
+.elementor .ssr-sec-head--dark.e-con { margin-bottom: 0; }
+
+.ssr-dark-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(26px, 3.5vw, 46px);
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.elementor .ssr-dark-h2.elementor-widget { margin-bottom: 12px; }
+
+.ssr-dark-lede.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.7;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.elementor .ssr-dark-lede.elementor-widget { margin-bottom: 48px; }
+.ssr-max-600 p { max-width: 600px; }
+.ssr-max-620 p { max-width: 620px; }
+
+/* Cost grid that fits as many 240px columns as the row allows. */
+.ssr-cols-auto240 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+@media (max-width: 768px) { .ssr-cols-auto240 { grid-template-columns: 1fr; } }
+
+/* ── House damage diagram ─────────────────────────────────────────────────── */
+.ssr-diagram-grid { align-items: flex-start; }
+.ssr-house-svg svg { display: block; width: 100%; max-width: 480px; }
+
+@media (max-width: 768px) { .ssr-diagram-grid { row-gap: 24px; } }
+
+/* The pin list is the tab list, rendered under the detail panel. */
+.ssr-pin-tabs {
+	--n-tabs-direction: column-reverse;
+	--n-tabs-gap: 32px;
+	--n-tabs-heading-direction: column;
+	--n-tabs-heading-wrap: wrap;
+	--n-tabs-title-gap: 8px;
+	--n-tabs-title-font-size: 14px;
+	--n-tabs-title-justify-content: flex-start;
+	--n-tabs-title-text-align: start;
+	--n-tabs-title-padding-top: 12px;
+	--n-tabs-title-padding-bottom: 12px;
+	--n-tabs-title-padding-left: 16px;
+	--n-tabs-title-padding-right: 16px;
+	--n-tabs-title-border-radius: 6px;
+	--n-tabs-title-background-color: rgba(255, 255, 255, 0.04);
+	--n-tabs-title-background-color-hover: rgba(255, 255, 255, 0.07);
+	--n-tabs-title-background-color-active: rgba(233, 168, 37, 0.1);
+	--n-tabs-title-color: rgba(255, 255, 255, 0.65);
+	--n-tabs-title-color-hover: var(--ssr-white);
+	--n-tabs-title-color-active: var(--ssr-gold);
+}
+
+.ssr-pin-tabs .e-n-tabs-heading button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	width: 100%;
+}
+
+.ssr-pin-tabs .e-n-tabs-heading button[aria-selected="true"] { border-color: var(--ssr-gold); }
+
+.ssr-pin-detail { border-left: 4px solid #C4462F; padding-left: 24px; }
+.elementor .ssr-pin-head.e-con { margin-bottom: 16px; }
+
+.elementor .ssr-pin-badge {
+	flex: 0 0 32px;
+	width: 32px;
+	height: 32px;
+	background: #C4462F;
+	border-radius: 50%;
+	align-items: center;
+	justify-content: center;
+}
+
+.elementor .ssr-pin-badge .elementor-widget { width: auto; margin: 0; }
+
+.ssr-pin-num.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1;
+	color: var(--ssr-white);
+}
+
+.ssr-pin-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.ssr-pin-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.75;
+	color: rgba(255, 255, 255, 0.72);
+}
+
+/* ── Seamless vs sectional ────────────────────────────────────────────────── */
+.ssr-cmp-card { border-radius: 8px; padding: 32px; }
+.ssr-cmp-card--bad { background: #FFF5F4; border: 1px solid #F0D0CC; }
+.ssr-cmp-card--good { background: #F4FBF5; border: 1px solid #C8E0CC; }
+.elementor .ssr-cmp-head.e-con { margin-bottom: 20px; }
+
+.ssr-cmp-tag.elementor-widget-heading {
+	flex: 0 0 auto;
+	width: auto;
+	padding: 4px 10px;
+	border-radius: 4px;
+}
+
+.ssr-cmp-tag--bad.elementor-widget-heading { background: #C4462F; }
+.ssr-cmp-tag--good.elementor-widget-heading { background: #2A8A4A; }
+
+.ssr-cmp-tag .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.ssr-cmp-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 20px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-cmp-svg.elementor-widget { margin-bottom: 20px; }
+.ssr-cmp-svg svg { display: block; border-radius: 6px; padding: 8px; }
+.ssr-cmp-svg--bad svg { background: #F0EDEA; }
+.ssr-cmp-svg--good svg { background: #EDF5EE; }
+
+.ssr-tick.elementor-widget-heading { flex: 0 0 auto; width: auto; }
+
+.ssr-tick.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.55;
+	text-transform: none;
+}
+
+.ssr-tick--bad .elementor-heading-title { color: #C4462F; }
+.ssr-tick--good .elementor-heading-title { color: #2A8A4A; }
+
+.ssr-tick-text.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.55;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+/* ── Sizing calculator (custom widget) ────────────────────────────────────── */
+.ssr-gcalc {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 48px;
+	align-items: flex-start;
+}
+
+@media (max-width: 768px) { .ssr-gcalc { grid-template-columns: 1fr; gap: 32px; } }
+
+.ssr-gcalc-field { margin-bottom: 36px; }
+.ssr-gcalc-field:last-child { margin-bottom: 0; }
+
+.ssr-gcalc-label {
+	display: block;
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: rgba(255, 255, 255, 0.65);
+	margin-bottom: 12px;
+}
+
+.ssr-gcalc-sqft { color: var(--ssr-gold); }
+.ssr-gcalc-range { width: 100%; accent-color: var(--ssr-gold); cursor: pointer; }
+
+.ssr-gcalc-scale {
+	display: flex;
+	justify-content: space-between;
+	font-family: var(--ssr-font-ui);
+	font-size: 11px;
+	color: rgba(255, 255, 255, 0.35);
+	margin-top: 4px;
+}
+
+.ssr-gcalc-pitch { display: flex; gap: 10px; }
+
+.ssr-gcalc button.ssr-gcalc-pitch-btn {
+	flex: 1 1 0;
+	min-width: 0;
+	padding: 12px 8px;
+	border-radius: 6px;
+	cursor: pointer;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	background: transparent;
+	color: rgba(255, 255, 255, 0.65);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.ssr-gcalc button.ssr-gcalc-pitch-btn.is-active {
+	border-color: var(--ssr-gold);
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+}
+
+.ssr-gcalc-out {
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	padding: 32px;
+}
+
+.ssr-gcalc-out-h {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--ssr-gold);
+	margin: 0 0 16px;
+}
+
+.ssr-gcalc-stats { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; }
+
+.ssr-gcalc-num {
+	font-family: var(--ssr-font-display);
+	font-size: 42px;
+	color: var(--ssr-white);
+	margin: 0;
+	line-height: 1;
+}
+
+.ssr-gcalc-cap {
+	font-family: var(--ssr-font-ui);
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.5);
+	margin: 4px 0 0;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+.ssr-gcalc-note { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; }
+
+.ssr-gcalc-verdict {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.6);
+	line-height: 1.7;
+	margin: 0;
+}
+
+.ssr-gcalc-fine {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.4);
+	line-height: 1.6;
+	margin: 12px 0 0;
+	font-style: italic;
+}
+
+/* ── Guard verdict table ──────────────────────────────────────────────────── */
+.ssr-guard-table { border-radius: 6px; }
+
+.ssr-guard-row {
+	grid-template-columns: 200px 120px 1fr;
+	align-items: center;
+	padding: 20px 24px;
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-top: none;
+}
+
+.ssr-guard-row--alt { background: var(--ssr-bone); }
+.ssr-guard-row--first { border-top: 1px solid #E2E0DB; border-radius: 6px 6px 0 0; }
+.ssr-guard-row--last { border-radius: 0 0 6px 6px; }
+
+@media (max-width: 768px) { .ssr-guard-row { grid-template-columns: 1fr; row-gap: 8px; } }
+
+.ssr-guard-type.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-guard-verdict.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 800;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.ssr-verdict--good .elementor-heading-title { color: #2A8A4A; }
+.ssr-verdict--mid .elementor-heading-title { color: var(--ssr-gold); }
+.ssr-verdict--bad .elementor-heading-title { color: #C4462F; }
+
+.ssr-guard-body.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.6;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+/* ── Fascia & soffit ──────────────────────────────────────────────────────── */
+.ssr-fascia-img img { width: 100%; height: 480px; object-fit: cover; border-radius: 8px; display: block; }
+
+.ssr-fascia-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(26px, 3vw, 42px);
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-fascia-h2.elementor-widget { margin-bottom: 24px; }
+
+.ssr-fascia-p.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.75;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-fascia-p.elementor-widget { margin-bottom: 20px; }
+.elementor .ssr-fascia-p--last.elementor-widget { margin-bottom: 28px; }
+
+.ssr-fascia-note {
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+.ssr-fascia-note-b.elementor-widget-text-editor { font-size: 15px; line-height: 1.65; color: var(--ssr-slate); }
+.ssr-fascia-note-b strong { color: var(--ssr-charcoal); }
+
+/* ── Gauges + colour swatches ─────────────────────────────────────────────── */
+.elementor .ssr-gauge-grid.e-con { margin-bottom: 48px; }
+
+.ssr-gauge-card {
+	background: rgba(255, 255, 255, 0.05);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 6px;
+	padding: 24px;
+}
+
+.elementor .ssr-gauge-head.e-con { margin-bottom: 10px; }
+
+.ssr-gauge-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-white);
+}
+
+.ssr-gauge-tag.elementor-widget-heading {
+	flex: 0 0 auto;
+	width: auto;
+	padding: 4px 10px;
+	border-radius: 20px;
+	background: rgba(255, 255, 255, 0.1);
+}
+
+.ssr-gauge-tag--ours.elementor-widget-heading { background: var(--ssr-gold); }
+
+.ssr-gauge-tag .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+.ssr-gauge-tag--ours .elementor-heading-title { color: var(--ssr-navy); }
+
+.ssr-gauge-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.65;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.ssr-swatch-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: rgba(255, 255, 255, 0.5);
+}
+
+.elementor .ssr-swatch-h.elementor-widget { margin-bottom: 16px; }
+
+.ssr-swatches { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.ssr-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.ssr-swatch-dot {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ssr-swatch-name {
+	font-family: var(--ssr-font-ui);
+	font-size: 10px;
+	color: rgba(255, 255, 255, 0.45);
+	text-align: center;
+	max-width: 50px;
+	line-height: 1.3;
+}
+
+/* ── Pill related-service links ───────────────────────────────────────────── */
+.ssr-related-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-related-h.elementor-widget { margin-bottom: 20px; }
+
+.ssr-pill-link {
+	width: auto;
+	padding: 14px 22px;
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-radius: 6px;
+	text-decoration: none;
+}
+
+.ssr-pill-link-text.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+/* ==========================================================================
+   Flooring page
+   ========================================================================== */
+
+/* This page uses plain navy Anton h2s rather than <SectionHeader>. */
+.ssr-fl-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 32px;
+	line-height: 1.5;
+	letter-spacing: 0.02em;
+	text-transform: none;
+	color: var(--ssr-navy);
+}
+
+.elementor .ssr-fl-h2--mb32.elementor-widget { margin-bottom: 32px; }
+.elementor .ssr-fl-h2--mb40.elementor-widget { margin-bottom: 40px; }
+.elementor .ssr-fl-h2--mb48.elementor-widget { margin-bottom: 48px; }
+
+.ssr-fl-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.8;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-cols-auto200 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* ── Room-by-room floor plan ──────────────────────────────────────────────── */
+.ssr-room-tabs { --n-tabs-gap: 32px; }
+
+.ssr-room-row { align-items: flex-start; }
+/* `.elementor` prefix again: Elementor's `.e-con` sets flex-basis/grow at the
+   same specificity and lands later, so bare classes wrap to one column. */
+.elementor .ssr-plan-col { flex: 1 1 340px; min-width: 280px; }
+.elementor .ssr-room-col { flex: 1 1 300px; min-width: 260px; }
+
+.ssr-plan svg {
+	width: 100%;
+	max-width: 420px;
+	border: 1.5px solid var(--ssr-charcoal);
+	border-radius: 4px;
+	background: #FAFAF7;
+	display: block;
+}
+
+.elementor .ssr-plan-note.elementor-widget { margin-top: 8px; }
+
+.ssr-plan-note.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+.ssr-room-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 36px;
+	line-height: 1.5;
+	letter-spacing: 0.03em;
+	text-transform: none;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-room-name.elementor-widget { margin-bottom: 8px; }
+
+.ssr-room-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-room-label.elementor-widget { margin-bottom: 6px; }
+.elementor .ssr-room-label--why.elementor-widget { margin-bottom: 8px; }
+
+.ssr-room-material.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-navy);
+}
+
+.elementor .ssr-room-material.elementor-widget { margin-bottom: 16px; }
+
+.ssr-room-why.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.7;
+	color: var(--ssr-charcoal);
+}
+
+/* ── Filterable materials table ───────────────────────────────────────────── */
+.ssr-chip-tabs--filter {
+	--n-tabs-gap: 32px;
+	--n-tabs-title-font-size: 13px;
+	--n-tabs-title-padding-top: 8px;
+	--n-tabs-title-padding-bottom: 8px;
+	--n-tabs-title-padding-left: 18px;
+	--n-tabs-title-padding-right: 18px;
+	--n-tabs-title-border-radius: 999px;
+	--n-tabs-title-background-color: var(--ssr-white);
+	--n-tabs-title-background-color-hover: var(--ssr-white);
+	--n-tabs-title-background-color-active: var(--ssr-gold);
+	--n-tabs-title-color: var(--ssr-slate);
+	--n-tabs-title-color-hover: var(--ssr-charcoal);
+	--n-tabs-title-color-active: var(--ssr-navy);
+	--n-tabs-title-gap: 10px;
+	--n-tabs-heading-wrap: wrap;
+	--n-tabs-heading-justify-content: flex-start;
+}
+
+.ssr-chip-tabs--filter .e-n-tabs-heading button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	letter-spacing: 0.03em;
+	border: 1.5px solid #C8C0B0;
+}
+
+.ssr-chip-tabs--filter .e-n-tabs-heading button[aria-selected="true"] {
+	border-color: var(--ssr-gold);
+	font-weight: 700;
+}
+
+.ssr-flt-table { overflow-x: auto; }
+
+.ssr-flt-row {
+	grid-template-columns: 1.1fr 1.3fr 1.4fr 1.4fr 0.9fr 1fr;
+	align-items: center;
+	min-width: 900px;
+	border-bottom: 1px solid #E8E2D9;
+}
+
+.ssr-flt-head { background: var(--ssr-navy); border-bottom: none; }
+.ssr-flt-body { background: #FAFAF7; }
+.ssr-flt-body--alt { background: var(--ssr-white); }
+
+.ssr-flt-th.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.04em;
+	text-transform: none;
+	color: var(--ssr-white);
+	white-space: nowrap;
+}
+
+.elementor .ssr-flt-th.elementor-widget { padding: 12px 16px; }
+
+.ssr-flt-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-navy);
+}
+
+.ssr-flt-cell.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-flt-name.elementor-widget,
+.elementor .ssr-flt-cell.elementor-widget { padding: 14px 16px; }
+.ssr-flt-body .ssr-rating { padding: 14px 16px; }
+.ssr-flt-body .ssr-rating-label.elementor-widget-heading { flex: 0 0 62px; width: 62px; }
+
+/* ── Subfloor + humidity diagrams ─────────────────────────────────────────── */
+.elementor .ssr-cross-col { flex: 0 0 auto; width: auto; max-width: 100%; }
+.elementor .ssr-cross-copy { flex: 1 1 260px; }
+.ssr-cross svg { width: 380px; max-width: 100%; display: block; }
+
+.elementor .ssr-humid-col { flex: 1 1 300px; }
+.elementor .ssr-season-col { flex: 0 0 auto; width: auto; max-width: 100%; align-self: center; }
+.ssr-season svg { width: 320px; max-width: 100%; display: block; }
+.elementor .ssr-humid-col .ssr-fl-body.elementor-widget { margin-bottom: 16px; }
+.elementor .ssr-humid-col .ssr-fl-body.elementor-widget:last-child { margin-bottom: 0; }
+
+/* ── Flat internal links ──────────────────────────────────────────────────── */
+.ssr-flat-link {
+	padding: 28px 20px;
+	border: 1.5px solid #D4C9B8;
+	border-radius: 4px;
+	background: var(--ssr-white);
+	text-decoration: none;
+	align-items: center;
+	transition: border-color 0.15s, color 0.15s;
+}
+
+.ssr-flat-link:hover { border-color: var(--ssr-gold); }
+
+.ssr-flat-link-text.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 15px;
+	line-height: 1.5;
+	letter-spacing: 0.03em;
+	text-transform: none;
+	text-align: center;
+	color: var(--ssr-navy);
+}
+
+.ssr-flat-link:hover .ssr-flat-link-text .elementor-heading-title { color: var(--ssr-gold); }
+
+/* ==========================================================================
+   Bathroom page
+   ========================================================================== */
+
+.ssr-cols-auto280 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+@media (max-width: 768px) { .ssr-cols-auto280 { grid-template-columns: 1fr; } }
+
+.ssr-max-640 p { max-width: 640px; }
+.elementor .ssr-dark-lede--52.elementor-widget { margin-bottom: 52px; }
+.ssr-gold { color: var(--ssr-gold); }
+
+/* ── Tier selector ────────────────────────────────────────────────────────── */
+.ssr-tier-tabs { --n-tabs-gap: 48px; }
+
+.ssr-tier-card {
+	padding: 32px;
+	border-radius: 8px;
+	border: 2px solid #E2E0DB;
+	background: var(--ssr-white);
+	box-shadow: 0 2px 8px rgba(20, 23, 28, 0.06);
+	transition: all 0.2s ease;
+}
+
+.ssr-tier-card--on {
+	border-color: var(--ssr-gold);
+	background: #FFFBF0;
+	box-shadow: 0 8px 32px rgba(233, 168, 37, 0.18);
+	transform: translateY(-4px);
+}
+
+.elementor .ssr-tier-head.e-con { margin-bottom: 12px; }
+.elementor .ssr-tier-pills.e-con { margin-bottom: 18px; }
+.elementor .ssr-tier-list.e-con { margin-bottom: 16px; }
+.elementor .ssr-tier-tick.elementor-widget { width: auto; flex: 0 0 auto; line-height: 0; }
+
+.ssr-tier-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-tier-pill.elementor-widget {
+	flex: 0 0 auto;
+	width: auto;
+	padding: 4px 10px;
+	border-radius: 20px;
+}
+
+.ssr-tier-pill .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.ssr-tier-pill--navy.elementor-widget { background: var(--ssr-navy); }
+.ssr-tier-pill--navy .elementor-heading-title { color: var(--ssr-white); }
+.ssr-tier-pill--gold.elementor-widget { background: var(--ssr-gold); }
+.ssr-tier-pill--gold .elementor-heading-title { color: var(--ssr-navy); }
+.ssr-tier-pill--grey.elementor-widget { background: #F0EDE8; }
+.ssr-tier-pill--grey .elementor-heading-title { color: var(--ssr-slate); }
+
+/* The bullet disc is drawn here rather than as an inline SVG per row — the
+   three panels repeat these rows 54 times. */
+.ssr-tier-row { position: relative; padding-left: 22px; margin-bottom: 6px; }
+
+.ssr-tier-row::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 4px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #E2E0DB;
+}
+
+.ssr-tier-row::after {
+	content: '';
+	position: absolute;
+	left: 4px;
+	top: 8.4px;
+	width: 5px;
+	height: 2.5px;
+	border-left: 1.5px solid #9A9590;
+	border-bottom: 1.5px solid #9A9590;
+	transform: rotate(-45deg);
+}
+
+.ssr-tier-card--on .ssr-tier-row::before { background: var(--ssr-gold); }
+
+.ssr-tier-card--on .ssr-tier-row::after {
+	border-left-color: var(--ssr-navy);
+	border-bottom-color: var(--ssr-navy);
+}
+
+.ssr-tier-item.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+.ssr-tier-note.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	line-height: 1.6;
+	font-style: italic;
+	color: var(--ssr-slate);
+}
+
+.ssr-tier-note--off.elementor-widget-text-editor { color: #B0ACA6; }
+
+/* Selected-scope summary strip */
+.ssr-sel-strip {
+	border-left: 4px solid var(--ssr-gold);
+	background: #FFFBF0;
+	border-radius: 0 6px 6px 0;
+	padding: 24px 28px;
+}
+
+.elementor .ssr-sel-col { flex: 0 0 auto; width: auto; }
+.elementor .ssr-sel-quote-col { flex: 1 1 240px; min-width: 240px; }
+
+.ssr-sel-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.ssr-sel-label--grey.elementor-widget-heading .elementor-heading-title { color: var(--ssr-slate); }
+.elementor .ssr-sel-label.elementor-widget { margin-bottom: 4px; }
+.elementor .ssr-sel-label--grey.elementor-widget { margin-bottom: 6px; }
+
+.ssr-sel-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-sel-title.elementor-widget { margin-bottom: 4px; }
+
+.ssr-sel-meta.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-slate);
+}
+
+.ssr-sel-quote.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-sel-quote p {
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-radius: 4px;
+	padding: 10px 14px;
+	margin: 0;
+}
+
+.elementor .ssr-sel-cta.elementor-widget { flex: 0 0 auto; width: auto; }
+
+.ssr-sel-cta .elementor-button {
+	background: var(--ssr-gold);
+	color: var(--ssr-navy);
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	padding: 14px 28px;
+	border-radius: 6px;
+	white-space: nowrap;
+}
+
+.ssr-sel-cta .elementor-button:hover { background: var(--ssr-gold-hover); color: var(--ssr-navy); }
+
+/* ── Tub-to-shower + aging in place ───────────────────────────────────────── */
+.ssr-bath-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(26px, 3vw, 44px);
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.ssr-bath-h2--light.elementor-widget-heading .elementor-heading-title { color: var(--ssr-charcoal); }
+.elementor .ssr-bath-h2.elementor-widget { margin-bottom: 24px; }
+
+.ssr-bath-p.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.75;
+	color: rgba(255, 255, 255, 0.7);
+}
+
+.ssr-bath-p strong { color: var(--ssr-white); }
+.ssr-bath-p--light.elementor-widget-text-editor { color: var(--ssr-slate); }
+.ssr-bath-p--light strong { color: var(--ssr-charcoal); }
+.elementor .ssr-bath-p.elementor-widget { margin-bottom: 20px; }
+
+.ssr-bath-note {
+	background: rgba(233, 168, 37, 0.12);
+	border: 1px solid rgba(233, 168, 37, 0.4);
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+.elementor .ssr-bath-note.e-con { margin-top: 24px; }
+
+.ssr-bath-note-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.65;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.ssr-aging-img img { width: 100%; height: 480px; object-fit: cover; border-radius: 8px; display: block; }
+
+.elementor .ssr-aging-dot {
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	background: var(--ssr-gold);
+	border-radius: 50%;
+	margin-top: 8px;
+}
+
+.ssr-aging-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-aging-title.elementor-widget { margin-bottom: 4px; }
+
+.ssr-aging-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.65;
+	color: var(--ssr-slate);
+}
+
+/* ── Waterproofing layers ─────────────────────────────────────────────────── */
+.ssr-wp-tabs {
+	--n-tabs-direction: column-reverse;
+	--n-tabs-gap: 28px;
+	--n-tabs-heading-wrap: wrap;
+	--n-tabs-heading-justify-content: flex-start;
+	--n-tabs-title-gap: 8px;
+	--n-tabs-title-font-size: 12px;
+	--n-tabs-title-padding-top: 8px;
+	--n-tabs-title-padding-bottom: 8px;
+	--n-tabs-title-padding-left: 16px;
+	--n-tabs-title-padding-right: 16px;
+	--n-tabs-title-border-radius: 4px;
+	--n-tabs-title-background-color: transparent;
+	--n-tabs-title-background-color-hover: rgba(255, 255, 255, 0.06);
+	--n-tabs-title-background-color-active: var(--ssr-gold);
+	--n-tabs-title-color: rgba(255, 255, 255, 0.65);
+	--n-tabs-title-color-hover: var(--ssr-white);
+	--n-tabs-title-color-active: var(--ssr-navy);
+}
+
+.ssr-wp-tabs .e-n-tabs-heading button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.ssr-wp-tabs .e-n-tabs-heading button[aria-selected="true"] { border-color: var(--ssr-gold); }
+
+.elementor .ssr-wp-col { flex: 0 0 auto; width: clamp(220px, 30vw, 320px); }
+.elementor .ssr-wp-copy { flex: 1 1 280px; min-width: 280px; }
+.ssr-wp-diagram svg { display: block; width: 100%; }
+
+.ssr-wp-hint.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	font-size: 11px;
+	line-height: 1.5;
+	text-transform: none;
+	text-align: center;
+	color: rgba(255, 255, 255, 0.35);
+}
+
+.elementor .ssr-wp-hint.elementor-widget { margin-top: 8px; }
+
+.ssr-wp-detail { border-left: 4px solid var(--ssr-gold); padding-left: 24px; }
+
+.ssr-wp-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 26px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.elementor .ssr-wp-title.elementor-widget { margin-bottom: 14px; }
+
+.ssr-wp-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.75;
+	color: rgba(255, 255, 255, 0.72);
+}
+
+.ssr-wp-std {
+	background: rgba(233, 168, 37, 0.12);
+	border: 1px solid rgba(233, 168, 37, 0.35);
+	border-radius: 6px;
+	padding: 16px 20px;
+}
+
+.elementor .ssr-wp-std.e-con { margin-top: 24px; }
+
+.ssr-wp-std-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-wp-std-h.elementor-widget { margin-bottom: 6px; }
+
+.ssr-wp-std-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.6;
+	color: rgba(255, 255, 255, 0.65);
+}
+
+/* ── Water-access note ────────────────────────────────────────────────────── */
+.ssr-water-note {
+	background: var(--ssr-white);
+	border: 1px solid #E2E0DB;
+	border-radius: 6px;
+	padding: 20px 24px;
+	max-width: 680px;
+}
+
+.elementor .ssr-water-note.e-con { margin-top: 32px; }
+
+.ssr-water-note-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.7;
+	color: var(--ssr-slate);
+}
+
+.ssr-water-note-b strong { color: var(--ssr-charcoal); }
+
+/* ==========================================================================
+   Decks & Fencing page
+   ========================================================================== */
+
+.elementor .ssr-mb48.e-con { margin-bottom: 48px; }
+.elementor .ssr-mb56.e-con { margin-bottom: 56px; }
+
+/* Alert-toned rating fill (composite heat retention). */
+.ssr-rf--alert { background: #C4462F; }
+
+/* ── Split hero ───────────────────────────────────────────────────────────── */
+.ssr-split-hero {
+	height: 80vh;
+	min-height: 500px;
+	max-height: 780px;
+	overflow: hidden;
+	padding-top: 84px;
+	position: relative;
+	flex-wrap: nowrap;
+}
+
+.elementor .ssr-split-half {
+	position: relative;
+	overflow: hidden;
+	flex: 0 0 auto;
+	width: 50%;
+	cursor: pointer;
+	transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+	justify-content: flex-end;
+}
+
+/* The source expands the hovered half to 65% and shrinks the other to 35%.
+   `:has()` lets the same behaviour come from CSS alone — no JS needed. */
+@media (hover: hover) {
+	.ssr-split-hero:has(.ssr-split-half--deck:hover) .ssr-split-half--deck { width: 65%; }
+	.ssr-split-hero:has(.ssr-split-half--deck:hover) .ssr-split-half--fence { width: 35%; }
+	.ssr-split-hero:has(.ssr-split-half--fence:hover) .ssr-split-half--fence { width: 65%; }
+	.ssr-split-hero:has(.ssr-split-half--fence:hover) .ssr-split-half--deck { width: 35%; }
+}
+
+.ssr-split-img,
+.ssr-split-img > .elementor-widget-container { position: static; }
+
+.ssr-split-img img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.ssr-split-half::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+.ssr-split-half--deck::after {
+	background: linear-gradient(135deg, rgba(14,17,22,0.75) 0%, rgba(14,17,22,0.4) 100%);
+}
+
+.ssr-split-half--fence::after {
+	background: linear-gradient(225deg, rgba(20,41,77,0.82) 0%, rgba(20,41,77,0.4) 100%);
+}
+
+.ssr-split-body {
+	position: relative;
+	z-index: 2;
+	padding: 0 clamp(20px, 4vw, 48px) 52px;
+	align-items: flex-start;
+}
+
+.elementor .ssr-split-rule {
+	flex: 0 0 4px;
+	width: 4px;
+	background: var(--ssr-white);
+	z-index: 10;
+}
+
+.ssr-split-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(32px, 4vw, 58px);
+	line-height: 0.95;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.elementor .ssr-split-h2.elementor-widget { margin-bottom: 12px; }
+
+.ssr-split-sub.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 1.5;
+	text-transform: none;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+.elementor .ssr-split-sub.elementor-widget { margin-bottom: 24px; max-width: 300px; }
+.elementor .ssr-split-cta.elementor-widget { width: auto; }
+
+.ssr-split-cta .elementor-button {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	padding: 13px 26px;
+	border-radius: 6px;
+}
+
+.ssr-split-cta--gold .elementor-button { background: var(--ssr-gold); color: var(--ssr-navy); }
+.ssr-split-cta--gold .elementor-button:hover { background: var(--ssr-gold-hover); color: var(--ssr-navy); }
+.ssr-split-cta--white .elementor-button { background: var(--ssr-white); color: var(--ssr-navy); }
+.ssr-split-cta--white .elementor-button:hover { background: #f0f4ff; color: var(--ssr-navy); }
+
+@media (max-width: 768px) {
+	/* Elementor writes the container's flex-direction at (0,3,0) from the
+	   `flex_direction` setting, so the stack needs (0,4,0) to win. */
+	.elementor .elementor-element.ssr-split-hero.e-con { --flex-direction: column; }
+	.ssr-split-hero { height: auto; max-height: none; }
+	.elementor .ssr-split-half { width: 100%; min-height: 420px; }
+	.elementor .ssr-split-rule { width: 100%; flex: 0 0 4px; height: 4px; }
+}
+
+/* ── Section sub-headings ─────────────────────────────────────────────────── */
+.ssr-dk-h3.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 24px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-dk-h3--sm.elementor-widget-heading .elementor-heading-title { font-size: 20px; }
+.ssr-dk-h3--sm2.elementor-widget-heading .elementor-heading-title { font-size: 22px; }
+.elementor .ssr-dk-h3.elementor-widget { margin-bottom: 24px; }
+.elementor .ssr-dk-h3--mb20.elementor-widget { margin-bottom: 20px; }
+.elementor .ssr-dk-h3--sm.elementor-widget { margin-bottom: 10px; }
+
+/* ── Deck material cards ──────────────────────────────────────────────────── */
+.ssr-dm-card {
+	background: var(--ssr-bone);
+	border-radius: 10px;
+	padding: 26px 24px;
+	border: 1px solid #E4DFD5;
+}
+
+.ssr-dm-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-dm-name.elementor-widget { margin-bottom: 4px; }
+
+.ssr-dm-price.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-dm-price.elementor-widget { margin-bottom: 16px; }
+.elementor .ssr-dm-rating.e-con { margin-bottom: 16px; }
+.ssr-dm-rating .ssr-rating-label.elementor-widget-heading { flex: 0 0 80px; width: 80px; }
+
+.ssr-dm-desc.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ssr-slate);
+}
+
+.ssr-dm-warn { background: #FDE8E4; border-radius: 6px; padding: 10px 14px; }
+.elementor .ssr-dm-warn.e-con { margin-top: 14px; }
+.elementor .ssr-dm-warn-icon.elementor-widget { flex: 0 0 auto; width: auto; }
+
+.ssr-dm-warn-icon .elementor-heading-title {
+	color: #C4462F;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.55;
+}
+
+.ssr-dm-warn-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	line-height: 1.55;
+	color: #8B2A1E;
+}
+
+/* ── Deck design + fence style cards ──────────────────────────────────────── */
+.ssr-dd-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 18px 16px;
+}
+
+.ssr-fs-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 20px 18px;
+}
+
+.ssr-dd-name.elementor-widget-heading .elementor-heading-title,
+.ssr-fs-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-dd-name.elementor-widget { margin-bottom: 6px; }
+.elementor .ssr-fs-name.elementor-widget { margin-bottom: 4px; }
+
+.ssr-fs-height.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-fs-height.elementor-widget { margin-bottom: 8px; }
+
+.ssr-dd-desc.elementor-widget-text-editor,
+.ssr-fs-desc.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--ssr-slate);
+}
+
+/* ── Deck repair callout ──────────────────────────────────────────────────── */
+.ssr-repair {
+	background: rgba(233, 168, 37, 0.07);
+	border: 1px solid rgba(233, 168, 37, 0.25);
+	border-radius: 10px;
+	padding: 28px 32px;
+}
+
+.ssr-repair-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.75;
+	color: var(--ssr-slate);
+}
+
+/* ── Wind-loading note + fence material cards ─────────────────────────────── */
+.ssr-wind {
+	background: #FDE8E4;
+	border: 1px solid #E8C4BE;
+	border-radius: 8px;
+	padding: 16px 20px;
+}
+
+.elementor .ssr-wind.e-con { margin-bottom: 24px; }
+.elementor .ssr-wind-icon.elementor-widget { flex: 0 0 auto; width: auto; }
+.ssr-wind-icon .elementor-heading-title { color: #C4462F; font-size: 20px; line-height: 1.65; }
+
+.ssr-wind-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.65;
+	color: #7A2E22;
+}
+
+.ssr-fm-card {
+	background: var(--ssr-white);
+	border-radius: 8px;
+	padding: 20px 18px;
+	border: 1px solid #E4DFD5;
+}
+
+.ssr-fm-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-fm-name.elementor-widget { margin-bottom: 4px; }
+
+.ssr-fm-depth.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 11px;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-fm-depth.elementor-widget { margin-bottom: 10px; }
+
+.ssr-fm-pros.elementor-widget-text-editor,
+.ssr-fm-cons.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	line-height: 1.55;
+}
+
+.ssr-fm-pros.elementor-widget-text-editor { color: #3A7D44; }
+.ssr-fm-cons.elementor-widget-text-editor { color: #8B4513; }
+.elementor .ssr-fm-pros.elementor-widget { margin-bottom: 6px; }
+
+/* ── Fence code visualiser ────────────────────────────────────────────────── */
+.ssr-code-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 10px;
+	padding: 32px;
+	max-width: 720px;
+	margin-inline: auto;
+}
+
+.ssr-code-eyebrow.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-code-eyebrow.elementor-widget { margin-bottom: 4px; }
+
+.ssr-code-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 20px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-code-title.elementor-widget { margin-bottom: 20px; }
+.ssr-code-diagram svg { width: 100%; height: auto; display: block; }
+.elementor .ssr-code-legend.e-con { margin-top: 22px; }
+
+.elementor .ssr-legend-dot {
+	flex: 0 0 14px;
+	width: 14px;
+	height: 14px;
+	border-radius: 2px;
+	margin-top: 2px;
+}
+
+.ssr-legend-dot--gold { background: var(--ssr-gold); }
+.ssr-legend-dot--navy { background: var(--ssr-navy); }
+.ssr-legend-dot--alert { background: #C4462F; }
+
+.ssr-legend-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-legend-label.elementor-widget { margin-bottom: 2px; }
+
+.ssr-legend-note.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-permit-grid.e-con { margin-top: 40px; }
+.ssr-permit-card { background: var(--ssr-bone); border-radius: 8px; padding: 24px 22px; }
+.ssr-permit-icon .elementor-heading-title { font-size: 28px; line-height: 1.2; }
+.elementor .ssr-permit-icon.elementor-widget { margin-bottom: 10px; }
+
+.ssr-permit-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-permit-title.elementor-widget { margin-bottom: 8px; }
+
+.ssr-permit-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ssr-slate);
+}
+
+/* ── Cost column headings ─────────────────────────────────────────────────── */
+.ssr-cost-head.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 20px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-cost-head.elementor-widget { margin-bottom: 20px; padding-bottom: 10px; }
+.ssr-cost-head--gold.elementor-widget { border-bottom: 2px solid var(--ssr-gold); }
+.ssr-cost-head--navy.elementor-widget { border-bottom: 2px solid var(--ssr-navy); }
+
+.ssr-linkhero--short { min-height: 200px; }
+.ssr-linkhero-bar--xs { padding: 22px 28px; }
+
+/* ==========================================================================
+   Kitchen page
+   ========================================================================== */
+
+/* This page's hero overlay is tighter on the right than <PageHero>'s default. */
+.ssr-page-hero--kitchen::before {
+	background:
+		linear-gradient(to bottom, rgba(14,17,22,0.2) 0%, transparent 20%, transparent 80%, rgba(14,17,22,0.4) 100%),
+		linear-gradient(90deg, rgba(14,17,22,0.88) 0%, rgba(14,17,22,0.55) 40%, rgba(14,17,22,0.05) 75%);
+}
+
+.ssr-kh2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(24px, 2.8vw, 40px);
+	line-height: 1.05;
+	letter-spacing: -0.005em;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-kbody.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.8;
+	color: var(--ssr-slate);
+}
+
+.ssr-klede.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.75;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-klede.elementor-widget { margin-bottom: 36px; }
+.ssr-max-720 p { max-width: 720px; }
+.ssr-max-760 p { max-width: 760px; }
+
+/* ── Budget allocator (custom widget) ─────────────────────────────────────── */
+.elementor .ssr-alloc-field { margin-bottom: 28px; }
+
+.ssr-alloc-total {
+	display: block;
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 18px;
+	color: var(--ssr-charcoal);
+	margin-bottom: 10px;
+}
+
+.ssr-alloc-range { width: 100%; accent-color: var(--ssr-gold); cursor: pointer; height: 6px; }
+
+.ssr-alloc-scale {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-family: var(--ssr-font-ui);
+	font-size: 12px;
+	color: var(--ssr-slate);
+}
+
+.ssr-alloc-bar {
+	display: flex;
+	height: 52px;
+	border-radius: 6px;
+	overflow: hidden;
+	margin-bottom: 24px;
+}
+
+.ssr-alloc-seg { flex-shrink: 0; transition: width 0.2s ease; }
+
+.ssr-alloc-legend {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px 32px;
+	margin-bottom: 28px;
+}
+
+@media (max-width: 768px) { .ssr-alloc-legend { grid-template-columns: 1fr; } }
+
+.ssr-alloc-row { display: flex; align-items: center; gap: 10px; justify-content: space-between; }
+.ssr-alloc-key { display: flex; align-items: center; gap: 8px; }
+
+.ssr-alloc-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.ssr-alloc-label { font-family: var(--ssr-font-ui); font-size: 13px; color: var(--ssr-charcoal); }
+.ssr-alloc-val { display: flex; align-items: center; gap: 6px; }
+.ssr-alloc-amount { font-family: var(--ssr-font-ui); font-weight: 700; font-size: 13px; color: var(--ssr-charcoal); }
+.ssr-alloc-pct { font-family: var(--ssr-font-ui); font-size: 12px; color: var(--ssr-slate); }
+
+.ssr-alloc-summary {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	color: var(--ssr-slate);
+	line-height: 1.75;
+	margin: 0;
+	background: var(--ssr-bone);
+	padding: 20px 24px;
+	border-radius: 6px;
+	border-left: 4px solid var(--ssr-gold);
+}
+
+/* ── Kitchen layout cards ─────────────────────────────────────────────────── */
+.ssr-layout-card {
+	align-items: center;
+	text-align: center;
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 20px 16px 18px;
+}
+
+.ssr-layout-svg svg { display: block; max-width: 100%; height: auto; }
+.elementor .ssr-layout-svg.elementor-widget { width: auto; }
+
+.ssr-layout-name.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.5;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+	text-align: center;
+}
+
+.elementor .ssr-layout-name.elementor-widget { margin: 10px 0 5px; }
+
+.ssr-layout-desc.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--ssr-slate);
+	text-align: center;
+}
+
+/* ── Price factor cards ───────────────────────────────────────────────────── */
+.ssr-pf-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-left: 4px solid var(--ssr-gold);
+	border-radius: 6px;
+	padding: 22px 24px 20px;
+	position: relative;
+	box-shadow: 0 4px 16px rgba(20, 23, 28, 0.05);
+}
+
+.elementor .ssr-pf-impact.elementor-widget {
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	width: auto;
+	padding: 3px 10px;
+	border-radius: 4px;
+	margin: 0;
+	z-index: 2;
+}
+
+.ssr-pf-impact .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.05em;
+	text-transform: none;
+	color: var(--ssr-white);
+}
+
+.ssr-pf-impact--navy.elementor-widget { background: var(--ssr-navy); }
+.ssr-pf-impact--slate.elementor-widget { background: var(--ssr-slate); }
+.ssr-pf-impact--gold.elementor-widget { background: var(--ssr-gold); }
+.ssr-pf-impact--gold .elementor-heading-title { color: var(--ssr-navy); }
+
+.ssr-pf-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 700;
+	font-size: 16px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-pf-title.elementor-widget { margin-bottom: 8px; padding-right: 80px; }
+
+.ssr-pf-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.7;
+	color: var(--ssr-slate);
+}
+
+/* ── Opening a wall ───────────────────────────────────────────────────────── */
+.elementor .ssr-wall-row.e-con { margin-bottom: 36px; }
+.elementor .ssr-wall-col { flex: 1 1 260px; min-width: 260px; }
+.ssr-wall-svg svg { max-width: 360px; display: block; width: 100%; }
+
+.ssr-wall-cap.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	text-align: center;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-wall-cap.elementor-widget { margin-top: 10px; max-width: 360px; }
+
+.ssr-lb-note {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-left: 4px solid var(--ssr-navy);
+	border-radius: 6px;
+	padding: 20px 24px;
+	max-width: 760px;
+}
+
+.elementor .ssr-lb-note.e-con { margin-top: 20px; }
+
+.ssr-lb-h.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-navy);
+}
+
+.elementor .ssr-lb-h.elementor-widget { margin-bottom: 8px; }
+
+.ssr-lb-b.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.75;
+	color: var(--ssr-slate);
+}
+
+/* ── Gantt timeline ───────────────────────────────────────────────────────── */
+.ssr-gantt-scroll { overflow-x: auto; }
+.ssr-gantt svg { min-width: 560px; width: 100%; display: block; }
+
+/* ── Living without a kitchen ─────────────────────────────────────────────── */
+.ssr-living-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 24px 24px 20px;
+	box-shadow: 0 4px 16px rgba(20, 23, 28, 0.05);
+}
+
+.elementor .ssr-living-icon {
+	flex: 0 0 44px;
+	width: 44px;
+	height: 44px;
+	border-radius: 8px;
+	background: #FDF3DE;
+	align-items: center;
+	justify-content: center;
+}
+
+.elementor .ssr-living-icon .elementor-widget { width: auto; margin: 0; line-height: 0; }
+
+.ssr-living-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-living-title.elementor-widget { margin-bottom: 6px; }
+
+.ssr-living-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ssr-slate);
+}
+
+/* ── Related-service cards ────────────────────────────────────────────────── */
+.ssr-krel-card {
+	background: var(--ssr-white);
+	border: 1px solid #E4DFD5;
+	border-radius: 8px;
+	padding: 26px 24px 22px;
+	text-decoration: none;
+	box-shadow: 0 4px 16px rgba(20, 23, 28, 0.05);
+	transition: border-color 0.15s;
+}
+
+.ssr-krel-card:hover { border-color: var(--ssr-gold); }
+
+.ssr-krel-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 18px;
+	line-height: 1.5;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-krel-title.elementor-widget { margin-bottom: 8px; }
+
+.ssr-krel-desc.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-krel-desc.elementor-widget { margin-bottom: 14px; }
+
+.ssr-krel-more.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+/* ==========================================================================
+   Contact page — copy styles
+   ========================================================================== */
+.ssr-ct-h1.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(32px, 4vw, 64px);
+	line-height: 0.95;
+	text-transform: uppercase;
+	color: var(--ssr-white);
+}
+
+.elementor .ssr-ct-h1.elementor-widget { margin-bottom: 16px; }
+
+.ssr-ct-sub.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.75);
+}
+
+/* Contact card */
+.ssr-cc-h3.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 22px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-cc-h3.elementor-widget { margin-bottom: 20px; }
+.elementor .ssr-cc-icon.elementor-widget { flex: 0 0 18px; width: 18px; line-height: 0; }
+.elementor .ssr-cc-row--phone.e-con { margin-bottom: 14px; }
+.elementor .ssr-cc-row--addr.e-con { margin-bottom: 20px; }
+
+.ssr-cc-phone.elementor-widget-heading .elementor-heading-title,
+.ssr-cc-phone.elementor-widget-heading a {
+	font-family: var(--ssr-font-ui);
+	font-weight: 700;
+	font-size: 17px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-gold);
+	text-decoration: none;
+}
+
+.ssr-cc-addr.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-body);
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-cc-label.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-ui);
+	font-weight: 600;
+	font-size: 12px;
+	line-height: 1.5;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-cc-label.elementor-widget { margin-top: 20px; margin-bottom: 8px; }
+
+.ssr-cc-line.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	line-height: 1.6;
+	color: var(--ssr-charcoal);
+}
+
+.ssr-cc-line--muted.elementor-widget-text-editor { color: var(--ssr-slate); }
+.elementor .ssr-cc-line--muted.elementor-widget { margin-top: 4px; }
+
+.ssr-cc-fine.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-cc-fine--tight.elementor-widget { margin-top: 2px; }
+.elementor .ssr-cc-map.elementor-widget { margin-top: 20px; }
+.ssr-cc-map svg { display: block; width: 100%; }
+
+/* "What happens after you hit send" */
+.ssr-after-num.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: clamp(36px, 8vw, 64px);
+	line-height: 1;
+	text-transform: none;
+	text-align: center;
+	color: var(--ssr-gold);
+}
+
+.elementor .ssr-after-step { padding: 32px 24px; text-align: center; }
+.elementor .ssr-after-num.elementor-widget { margin-bottom: 16px; }
+
+.ssr-after-title.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 20px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	text-align: center;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-after-title.elementor-widget { margin-bottom: 12px; }
+
+.ssr-after-body.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 15px;
+	line-height: 1.75;
+	text-align: center;
+	color: var(--ssr-slate);
+}
+
+/* Financing band */
+.ssr-fin-h2.elementor-widget-heading .elementor-heading-title {
+	font-family: var(--ssr-font-display);
+	font-weight: 400;
+	font-size: 28px;
+	line-height: 1.5;
+	text-transform: none;
+	color: var(--ssr-charcoal);
+}
+
+.elementor .ssr-fin-h2.elementor-widget { margin-bottom: 16px; }
+
+.ssr-fin-p.elementor-widget-text-editor {
+	font-family: var(--ssr-font-body);
+	font-size: 16px;
+	line-height: 1.5;
+	color: var(--ssr-slate);
+}
+
+.elementor .ssr-fin-p.elementor-widget { margin-bottom: 28px; }
+
+.ssr-faq-pad > .e-con-inner { padding-left: 48px; padding-right: 48px; }
+
+@media (max-width: 768px) {
+	.ssr-faq-pad > .e-con-inner { padding-left: 20px; padding-right: 20px; }
+}
