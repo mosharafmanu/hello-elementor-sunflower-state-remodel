@@ -1,0 +1,114 @@
+/* ==========================================================================
+   faisal.css — Faisal's stylesheet
+
+   Loaded after style.css, so the design tokens in :root are already
+   available here. Scope every rule under a class so nothing leaks into
+   sections another developer owns.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Section: testimonials grid
+   -------------------------------------------------------------------------- */
+.ssr-testimonial {
+	background: var(--ssr-bone);
+	border-left: 4px solid var(--ssr-gold);
+	border-radius: 3px;
+	padding: 26px 24px;
+}
+
+.ssr-testimonial__quote {
+	font-family: var(--ssr-font-body);
+	font-size: 17px;
+	line-height: 1.65;
+	color: var(--ssr-charcoal);
+	margin: 0 0 18px;
+}
+
+.ssr-testimonial__author {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-family: var(--ssr-font-ui);
+	font-size: 14px;
+	font-weight: 600;
+	letter-spacing: 0.05em;
+	text-transform: uppercase;
+	color: var(--ssr-navy);
+}
+
+.ssr-testimonial__avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+	flex: 0 0 auto;
+}
+
+.ssr-testimonial__stars {
+	color: var(--ssr-gold);
+	letter-spacing: 0.12em;
+	margin-bottom: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   Section: footer
+   -------------------------------------------------------------------------- */
+.ssr-footer {
+	background: var(--ssr-navy-deep);
+	color: var(--ssr-white);
+	padding: 56px var(--ssr-gutter) 32px;
+}
+
+.ssr-footer__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 32px;
+	max-width: var(--ssr-container);
+	margin: 0 auto;
+}
+
+.ssr-footer__heading {
+	font-family: var(--ssr-font-display);
+	font-size: 18px;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	color: var(--ssr-gold);
+	margin: 0 0 14px;
+}
+
+.ssr-footer a {
+	color: rgba(255, 255, 255, 0.78);
+	text-decoration: none;
+}
+
+.ssr-footer a:hover,
+.ssr-footer a:focus-visible {
+	color: var(--ssr-gold);
+}
+
+.ssr-footer__legal {
+	max-width: var(--ssr-container);
+	margin: 40px auto 0;
+	padding-top: 20px;
+	border-top: 1px solid rgba(255, 255, 255, 0.14);
+	font-family: var(--ssr-font-body);
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.55);
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+   -------------------------------------------------------------------------- */
+@media (max-width: 767px) {
+	.ssr-testimonial {
+		padding: 20px 18px;
+	}
+
+	.ssr-footer {
+		padding: 40px 20px 28px;
+	}
+
+	.ssr-footer__grid {
+		gap: 24px;
+	}
+}
