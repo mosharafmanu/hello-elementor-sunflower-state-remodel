@@ -112,3 +112,21 @@
 		gap: 24px;
 	}
 }
+
+/* faisal css start */
+
+.ssr-hero .ssr-scroll-cue::after {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+}
+/* .elementor-icon-list-item.elementor-inline-item:not(:first-child)::before {
+	content: ".";
+	position: absolute;
+	left: -10px;
+	top: -10px;
+	color: rgba(255, 255, 255, 0.25);
+} */
+.elementor-icon-box-wrapper .elementor-icon {
+	margin-top: 10px;
+}
