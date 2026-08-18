@@ -101,3 +101,97 @@
 		}
 	} );
 } )();
+
+
+// Hamberger menu toggle
+
+
+jQuery(function ($) {
+
+    const header = $('#site-header');
+    const menuTrigger = $('#menu-trigger');
+
+    function updatePopupPosition() {
+
+        if (!header.length) {
+            return;
+        }
+
+        const headerHeight = header.outerHeight();
+
+        $('.elementor-popup-modal').each(function () {
+
+            const popup = $(this);
+
+            if (!popup.find('#mobile-menu-popup').length) {
+                return;
+            }
+
+
+            popup.css({
+                position: 'fixed',
+                top: headerHeight + 'px',
+                left: '0',
+                right: '0',
+                bottom: '0',
+                height: 'auto',
+                margin: '0',
+                padding: '0',
+                overflow: 'hidden'
+            });
+
+
+            $('#mobile-menu-popup').css({
+                height: '100%',
+                overflowY: 'auto'
+            });
+
+            const closeButton = popup.find('.dialog-close-button');
+
+            if (closeButton.length && menuTrigger.length) {
+
+                const triggerRect =
+                    menuTrigger[0].getBoundingClientRect();
+
+                closeButton.css({
+                    position: 'fixed',
+                    top: triggerRect.top + 'px',
+                    left: triggerRect.left + 'px',
+                    right: 'auto',
+                    margin: '0',
+                    transform: 'none',
+                    zIndex: 999999
+                });
+            }
+
+        });
+    }
+
+    $(document).on('elementor/popup/show', function () {
+
+        menuTrigger.addClass('is-hidden');
+
+        setTimeout(updatePopupPosition, 50);
+        setTimeout(updatePopupPosition, 200);
+
+    });
+
+    $(document).on('elementor/popup/hide', function () {
+
+        menuTrigger.removeClass('is-hidden');
+
+    });
+
+    $(window).on('resize', function () {
+
+        updatePopupPosition();
+
+    });
+
+    $(window).on('scroll', function () {
+
+        updatePopupPosition();
+
+    });
+
+});
