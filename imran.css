@@ -98,3 +98,22 @@
 		padding: 16px 20px;
 	}
 }
+
+
+
+/* --------------------------------------------------------------------------
+   Widget Hotspot
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 769px) {
+
+	.ssr-hail-desktop {
+		display: block;
+		height: 400px;
+		margin-bottom: 20px;
+	}
+
+	.elementor-widget-hotspot .elementor-widget-container .e-hotspot {
+		display: none;
+	}
+}

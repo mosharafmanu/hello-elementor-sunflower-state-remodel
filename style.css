@@ -666,6 +666,8 @@ a.ssr-btn-navy {
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
+	position: relative;
+	z-index: 5;
 }
 
 .ssr-rosette .elementor-widget {
@@ -1795,6 +1797,7 @@ a.ssr-btn-navy {
 	z-index: 10;
 	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 	padding: 0;
+	transition: none;
 }
 
 /* The Elementor Kit styles every raw <button> — `.elementor-kit-1 button`
@@ -2175,6 +2178,19 @@ a.ssr-btn-navy {
 
 .ssr-ins-num .elementor-widget { width: auto; margin: 0; }
 
+@media (max-width: 768px) {
+
+	.ssr-ins-timeline::before {
+		display: none;
+	}
+
+	.ssr-mat-grid {
+		grid-template-columns: 1fr;
+		max-width: 560px;
+		min-width: 0;
+	}
+}
+
 /* ==========================================================================
    Countertops & Cabinets page
    ========================================================================== */
@@ -2201,6 +2217,7 @@ a.ssr-btn-navy {
 .ssr-cols-2fr1 { grid-template-columns: 2fr 1fr; }
 
 @media (max-width: 768px) {
+
 	.ssr-split-380,
 	.ssr-cols-2fr1 { grid-template-columns: 1fr; }
 }
@@ -3555,6 +3572,7 @@ a.ssr-btn-navy {
 	text-transform: none;
 	text-align: center;
 	color: var(--ssr-navy);
+	transition: all 0.3s ease;
 }
 
 .ssr-flat-link:hover .ssr-flat-link-text .elementor-heading-title { color: var(--ssr-gold); }
@@ -4065,10 +4083,10 @@ a.ssr-btn-navy {
 @media (max-width: 768px) {
 	/* Elementor writes the container's flex-direction at (0,3,0) from the
 	   `flex_direction` setting, so the stack needs (0,4,0) to win. */
-	.elementor .elementor-element.ssr-split-hero.e-con { --flex-direction: column; }
+	.elementor .elementor-element.ssr-split-hero.e-con { --flex-direction: row; }
 	.ssr-split-hero { height: auto; max-height: none; }
-	.elementor .ssr-split-half { width: 100%; min-height: 420px; }
-	.elementor .ssr-split-rule { width: 100%; flex: 0 0 4px; height: 4px; }
+	.elementor .ssr-split-half { width: 50%; min-height: 420px; }
+	.elementor .ssr-split-rule { width: 50%; flex: 0 0 4px; height: auto; }
 }
 
 /* ── Section sub-headings ─────────────────────────────────────────────────── */
