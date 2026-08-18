@@ -2217,9 +2217,9 @@ a.ssr-btn-navy {
 .ssr-cols-2fr1 { grid-template-columns: 2fr 1fr; }
 
 @media (max-width: 768px) {
-
+/* 
 	.ssr-split-380,
-	.ssr-cols-2fr1 { grid-template-columns: 1fr; }
+	.ssr-cols-2fr1 { grid-template-columns: 1fr; } */
 }
 
 /* ── Chip selectors (Elementor Pro nested tabs) ───────────────────────────
