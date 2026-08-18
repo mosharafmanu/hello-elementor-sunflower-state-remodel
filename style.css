@@ -1295,6 +1295,11 @@ a.ssr-btn-navy {
 .ssr-cols-5 { grid-template-columns: repeat(5, 1fr); }
 .ssr-grid-7 { grid-template-columns: repeat(7, 1fr); }
 
+@media (max-width: 900px) {
+	.ssr-tab2 { grid-template-columns: repeat(2, 1fr); }
+	.ssr-grid-7 { grid-template-columns: repeat(1, 1fr); }
+}
+
 @media (max-width: 768px) {
 	.ssr-cols-2,
 	.ssr-cols-3,
@@ -1303,13 +1308,10 @@ a.ssr-btn-navy {
 	/* `.ssr-tab2` is declared last on purpose — it is the `col-2-tablet`
 	   modifier and must beat the base collapse in the 481–768 band. */
 	.ssr-tab2 { grid-template-columns: 1fr 1fr; }
-	.ssr-grid-7 { grid-template-columns: repeat(2, 1fr); }
+	.ssr-grid-7 { grid-template-columns: 1fr 1fr; }
 }
 
-@media (max-width: 480px) {
-	.ssr-tab2 { grid-template-columns: 1fr; }
-	.ssr-grid-7 { grid-template-columns: 1fr; }
-}
+
 
 /* A few sections use the fluid gutter instead of the fixed 32px one. */
 .ssr-padfluid32 > .e-con-inner {
@@ -2210,9 +2212,11 @@ a.ssr-btn-navy {
 .ssr-cols-2fr1 { grid-template-columns: 2fr 1fr; }
 
 @media (max-width: 768px) {
-/* 
-	.ssr-split-380,
-	.ssr-cols-2fr1 { grid-template-columns: 1fr; } */
+
+
+	.ssr-split-380 { 
+		grid-template-columns: 1fr; 
+	}
 }
 
 /* ── Chip selectors (Elementor Pro nested tabs) ───────────────────────────
